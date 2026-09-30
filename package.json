@@ -1,0 +1,43 @@
+{
+  "name": "commercial-director",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "test:e2e": "playwright test",
+    "verify": "npm run typecheck && npm run lint && npm run build && npm run test:e2e",
+    "test:e2e:install": "playwright install chromium"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.3",
+    "lucide-react": "1.47.0",
+    "next": "16.3.7",
+    "openai": "7.17.0",
+    "pg": "8.23.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.15.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "drizzle-kit": "0.31.11",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.3.7",
+    "tailwindcss": "4.3.3",
+    "typescript": "^5.9.0",
+    "@playwright/test": "1.63.0"
+  }
+}
