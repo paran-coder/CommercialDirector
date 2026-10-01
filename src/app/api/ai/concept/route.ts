@@ -28,18 +28,19 @@ export async function POST(request: Request) {
       projectId: repository ? dbProjectId : undefined,
       kind: "concept_refinement",
       payload: { conceptId: body.conceptId, instruction: body.instruction },
-      operation: async () => {
-        const concept = await reviseConcept(
-          provider,
-          body.bible,
-          body.territories,
-          body.concepts,
-          body.conceptId,
-          body.instruction,
-        );
-        if (repository && dbProjectId) await repository.saveConceptRevision(dbProjectId, concept, body.instruction);
-        return concept;
-      },
+      operation: () => reviseConcept(
+        provider,
+        body.bible,
+        body.territories,
+        body.concepts,
+        body.conceptId,
+        body.instruction,
+      ),
+      commit: repository && dbProjectId
+        ? async (concept) => {
+            await repository.saveConceptRevision(dbProjectId, concept, body.instruction);
+          }
+        : undefined,
     });
 
     return Response.json({
