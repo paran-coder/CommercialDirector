@@ -25,7 +25,7 @@ export const demoBrief: CreativeBrief = {
   coreBenefit: "밤의 순간을 위해 설계된 향",
   emotionalBenefit: "자리를 떠난 뒤에도 기억에 남는 존재감",
   mood: ["신비로운", "친밀한", "시네마틱"],
-  occasion: "저녁 외출",
+  occasion: "데이트/저녁 외출",
   constraints: ["뻔한 로맨스 클리셰 피하기", "화려함보다 프리미엄 절제감 유지"],
 };
 
