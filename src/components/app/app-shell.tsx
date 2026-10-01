@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Aperture, Plus } from "lucide-react";
+import { Aperture, BookOpen, Plus } from "lucide-react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -10,9 +10,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span className="grid size-7 place-items-center rounded-md border border-neutral-300 bg-white"><Aperture size={15} /></span>
             Commercial Director
           </Link>
-          <Link href="/projects/new" className="inline-flex h-9 items-center gap-2 rounded-md bg-neutral-950 px-3.5 text-sm font-medium text-white hover:bg-neutral-800">
-            <Plus size={15} /> New campaign
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/manual" className="inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium text-neutral-600 hover:bg-white hover:text-neutral-950">
+              <BookOpen size={15} /> 사용자 매뉴얼
+            </Link>
+            <Link href="/projects/new" className="inline-flex h-9 items-center gap-2 rounded-md bg-neutral-950 px-3.5 text-sm font-medium text-white hover:bg-neutral-800">
+              <Plus size={15} /> 새 캠페인
+            </Link>
+          </div>
         </div>
       </header>
       <main className="pt-16">{children}</main>
