@@ -6,6 +6,7 @@ import { buildCampaign } from "../src/ai/orchestration";
 import { generateObjectWithRetry } from "../src/ai/orchestration/generate";
 import { requiredExecutionTypes, validateConceptMatrix } from "../src/ai/orchestration/quality-gate";
 import { demoBrief, demoProduct } from "../src/lib/fixtures/demo";
+import { runTrackedGeneration, TrackedGenerationError } from "../src/services/tracked-generation";
 
 test("fixture campaign preserves an exact canonical 4 x 5 matrix", async () => {
   const campaign = await buildCampaign(new FixtureProvider(), demoProduct, demoBrief);
@@ -65,4 +66,33 @@ test("model-call retry retries malformed structured output once", async () => {
 
   expect(result).toEqual({ value: "ok" });
   expect(calls).toBe(2);
+});
+
+
+test("persistence failure never reruns successful generation", async () => {
+  let generationCalls = 0;
+  let commitCalls = 0;
+
+  let caught: unknown;
+  try {
+    await runTrackedGeneration({
+      kind: "campaign",
+      payload: { test: true },
+      maxAttempts: 2,
+      operation: async () => {
+        generationCalls += 1;
+        return { value: "generated" };
+      },
+      commit: async () => {
+        commitCalls += 1;
+        throw new Error("database unavailable");
+      },
+    });
+  } catch (error) {
+    caught = error;
+  }
+
+  expect(caught).toBeInstanceOf(TrackedGenerationError);
+  expect(generationCalls).toBe(1);
+  expect(commitCalls).toBe(1);
 });
