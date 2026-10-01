@@ -28,7 +28,7 @@ The source binding must include:
 - source Campaign Bible revision
 - source Asset Bible revision
 - source shortlisted concept stable keys
-- source concept revision fingerprints where available
+- source shortlisted Concept revision snapshot
 
 A production plan becomes stale when any bound source changes.
 
@@ -81,8 +81,8 @@ Application code assigns:
 - `treatment-<concept>-15`
 - `treatment-<concept>-30`
 - `treatment-<concept>-45`
-- `scene-<concept>-01`
-- `shot-<concept>-01-01`
+- `scene-<concept>-<duration>-01`
+- `shot-<concept>-<duration>-01-01`
 
 All asset references must use v1.1.0 Asset Bible keys such as `product-main`, `hero-primary`, `location-01`, and `prop-01`.
 
@@ -153,6 +153,7 @@ Each revision stores:
 - source Campaign revision
 - source Asset Bible revision
 - source concept keys
+- source concept revision snapshot
 - complete structured production plan
 - created time
 
