@@ -46,6 +46,51 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
     expect.objectContaining({ kind: "campaign", status: "succeeded" }),
     expect.objectContaining({ kind: "concept_refinement", status: "succeeded" }),
   ]));
+
+  await page.goto(`/projects/${projectId}/assets`);
+  await expect(page.getByRole("heading", { name: "Build the Asset Bible." })).toBeVisible();
+  await page.getByRole("button", { name: "Build Asset Bible" }).click();
+
+  await expect(page.getByRole("heading", { name: "Asset Bible" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Product Sheet" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hero" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Wardrobe" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Locations" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Props" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Global Continuity" })).toBeVisible();
+  await expect(page.getByText("Revision 1", { exact: true })).toBeVisible();
+  await expect(page.getByText("Current", { exact: true })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("Revision 1", { exact: true })).toBeVisible();
+  await expect(page.getByText("product-main", { exact: true })).toBeVisible();
+
+  const assetJobsResponse = await page.request.get(`/api/projects/${projectId}/generations`);
+  expect(assetJobsResponse.ok()).toBeTruthy();
+  const assetJobsBody = await assetJobsResponse.json();
+  expect(assetJobsBody.generations).toEqual(expect.arrayContaining([
+    expect.objectContaining({ kind: "asset_bible", status: "succeeded" }),
+  ]));
+
+  await page.getByRole("button", { name: "Regenerate" }).click();
+  await expect(page.getByText("Revision 2", { exact: true })).toBeVisible();
+
+  const projectResponse = await page.request.get(`/api/projects/${projectId}`);
+  expect(projectResponse.ok()).toBeTruthy();
+  const projectBody = await projectResponse.json();
+  expect(projectBody.project.assetBibleRevisions).toHaveLength(2);
+
+  const currentShortlist = projectBody.project.shortlist as string[];
+  const additionalConcept = projectBody.project.concepts.find((concept: { id: string }) => !currentShortlist.includes(concept.id));
+  if (!additionalConcept) throw new Error("Expected an additional concept for stale-state verification.");
+
+  const shortlistResponse = await page.request.put(`/api/projects/${projectId}/shortlist`, {
+    data: { conceptIds: [...currentShortlist, additionalConcept.id] },
+  });
+  expect(shortlistResponse.ok()).toBeTruthy();
+
+  await page.reload();
+  await expect(page.getByText("Out of date", { exact: true })).toBeVisible();
 });
 
 test("demo concept refinement controls remain reachable", async ({ page }) => {

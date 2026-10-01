@@ -1,81 +1,158 @@
-# Commercial Director v1.0.2 — Context Notes
+# Commercial Director v1.1.0 — Context Notes
 
 ## Product thesis
-Commercial Director turns one product image into a structured advertising decision system. The product deliberately validates creative strategy and concept selection before expensive media generation.
+Commercial Director is a creative decision system: one product image becomes a campaign world, 20 structured concepts, a shortlist, and now a reusable production Asset Bible.
 
-## Primary users
-- Brand / marketer: guided decisions and clear concepts with little production jargon.
-- Creative / production professional: the same project data with progressively disclosed production controls.
+## v1.1.0 completed scope
+- Product Sheet
+- Hero
+- Wardrobe
+- Locations
+- Props
+- Global Continuity
+- Assets project route
+- append-only Asset Bible revisions
+- source Campaign revision binding
+- source shortlist binding
+- stale-source detection
+- Asset Bible generation-job tracking
+- PostgreSQL and browser-fallback persistence
+- deterministic fixture and DB-backed E2E coverage
 
-## Core promise
-One product image → Product Intelligence → Creative Brief → Campaign Bible → 4 Creative Territories → 20 Campaign Concepts → Shortlist → Concept Detail.
+## Dependency rule
+Asset Bible is generated **after** shortlist, not before the 20 concepts.
 
-## Success criterion
-The core product metric is shortlisted concepts / generated concepts. The creative engine should produce a set diverse enough that users want to develop multiple directions rather than choose among paraphrases.
+Prerequisites:
+- Product Intelligence exists
+- Campaign Bible exists
+- current 4 × 5 concept matrix exists
+- shortlist contains 1–5 concepts
 
-## Product principles
-1. Better decisions over more generations.
-2. Build a reusable campaign world before executions.
-3. Preserve product identity explicitly through Identity Locks.
-4. Enforce structural diversity before asking a model to judge quality.
-5. Version AI outputs; never silently overwrite revisions.
-6. Keep provider-specific code behind adapters.
-7. Keep the interface restrained and professional.
-8. Use progressive disclosure rather than separate beginner/pro products.
+This avoids spending production-detail generation on directions the user has not chosen.
 
-## Current scope
-Included:
-- Product upload and Product Intelligence
-- Identity Locks
-- Creative Brief
-- Campaign Bible
-- 4 territories × 5 execution slots
-- 20 Concept Cards
-- Shortlist
-- Concept Detail + Pro Controls
-- Slot-level refinement
-- PostgreSQL runtime persistence
-- Generation-job history and retry state
-- Fixture and OpenAI provider paths
+## Domain contracts
 
-Excluded:
-- Final image/video rendering
-- Asset bible generation
-- Timeline/editor
-- Audio generation
-- Social publishing
-- Billing and team permissions
+### Product Sheet
+Exactly one canonical Product Sheet using stable key `product-main`.
 
-## Persistence architecture
-PostgreSQL is the source of truth whenever `DATABASE_URL` is configured. The repository layer persists projects, briefs, campaign revisions, territories, concepts, shortlist state, concept revisions, and generation jobs. Campaign creation commits campaign revision + territories + concepts + initial concept revisions transactionally.
+It preserves:
+- identity statement
+- visible product identity features
+- form/silhouette rules
+- materials and surface response
+- color and marking rules
+- scale and handling cues
+- preferred hero angles
+- unacceptable substitutions/distortions
+- product continuity locks
 
-localStorage remains a typed browser cache and DB-free fallback. IndexedDB stores the original uploaded image Blob.
+### Hero
+Exactly one canonical Hero record using stable key `hero-primary`.
 
-## AI provider rule
-`AIProvider` owns model invocation only. Domain orchestration owns schemas, prompts, retries, structural validation, quality review, and repair planning.
+Applicability:
+- required
+- optional
+- none
 
-Modes:
-- `AI_PROVIDER=fixture`: deterministic, no API key.
-- `AI_PROVIDER=openai`: Responses API + Structured Outputs.
+If applicability is `none`, Wardrobe must be empty.
 
-## v1.0.2 AI engine optimization
-- Added bounded per-model-call retry for transient and malformed structured output failures.
-- Kept whole-generation retry as a last-resort boundary while preventing persistence errors from rerunning successful AI work.
-- Added deterministic exact 4 × 5 matrix validation, including missing/duplicate execution slots and territory counts.
-- Canonicalized concept IDs from territory + execution type so slot identity is independent of model ordering.
-- Reduced quality-review payload to the fields needed for set-level evaluation.
-- Reduced repair context to compact campaign data, same-territory peers, and the most similar outside peers.
-- Kept repairs capped at six slots per quality pass.
-- Added provider-neutral reasoning effort hints; OpenAI maps them to Responses API reasoning effort.
-- Added deterministic Playwright/Node regression coverage for matrix validity, malformed-output retry, and persistence-failure non-regeneration.
+### Wardrobe
+Zero to four reusable looks with canonical keys `wardrobe-01...`.
+
+### Locations
+Three to six reusable environments with canonical keys `location-01...`.
+
+### Props
+Two to eight canonical production props with keys `prop-01...`.
+
+### Global Continuity
+Stores:
+- campaign-wide rules
+- intentional differences/conflicts that should remain distinct
+- production notes
+
+## AI orchestration
+Asset Bible uses three parallel structured generation calls:
+1. Product Continuity Director
+2. Casting & Styling Director
+3. Production Designer
+
+A compact cross-asset review follows.
+
+Application code—not the model—assigns stable keys. Deterministic validation checks:
+- section counts
+- key uniqueness
+- shortlisted concept references
+- Hero/Wardrobe compatibility
+- minimum continuity coverage
+
+Model-review issues and deterministic structural issues both feed the same bounded targeted repair path.
+
+## Prompt payload discipline
+Asset generation receives:
+- Product Intelligence and Identity Locks
+- compact Campaign Bible context
+- only shortlisted concepts
+- compact concept fields: stable key, type, title, hook, product role, requirements
+- territory title/premise
+
+It does not resend full Concept Detail/Pro content to every role.
+
+## Persistence
+PostgreSQL table: `asset_bible_revisions`
+
+Stored per revision:
+- project ID
+- revision
+- source Campaign revision
+- source concept-key snapshot
+- complete Asset Bible JSON
+- created time
+
+The repository hydrates both the latest Asset Bible and full revision history into `ProjectSnapshot`.
+
+Generation kind now includes `asset_bible`.
+
+## Concurrency/source drift
+Generation runs from one source snapshot. Before commit, the server reloads the project and compares:
+- latest Campaign revision
+- current shortlist set
+
+If either changed, persistence is rejected. Because persistence is outside the AI retry boundary, this rejection does not rerun successful model work.
+
+## Stale detection
+`isAssetBibleCurrent(project)` compares the latest Asset Bible source binding against the current project source.
+
+A changed Campaign Bible or shortlist marks the current Asset Bible out of date without deleting it.
+
+## UI
+New project navigation item: Assets.
+
+The Assets view handles:
+- no campaign
+- no shortlist
+- shortlist >5
+- initial generation
+- current revision metadata
+- regenerate
+- out-of-date state
+- Product Sheet / Hero / Wardrobe / Locations / Props / Global Continuity sections
+- stable keys and concept applicability
+
+The visual language remains restrained, editorial, and production-oriented.
 
 ## Validation
-GitHub Actions provisions PostgreSQL 17, runs `db:push`, then TypeScript typecheck, ESLint, production build, and Playwright. The v1.0.2 release candidate passed the full DB-backed gate on 2026-10-01, including six Playwright tests covering the core flow and AI-engine invariants.
+The feature-head gate passed against PostgreSQL 17 before release preparation:
+- db:push
+- typecheck
+- ESLint
+- production build
+- Playwright
 
-A real OpenAI-provider smoke test remains optional because it requires a live API key and incurs external model usage; deterministic release approval does not depend on it.
+The suite covers Asset Bible engine invariants and the DB-backed user flow through revision 2 and stale-state detection.
 
-## Future milestones
-- v1.1.0: Product/Hero/Wardrobe/Location/Prop asset bible
-- v1.2.0: Treatments, scenes, shotlist, prompt compiler
-- v1.3.0: Asset generation and continuity checks
-- v2.0.0: Video generation, assembly, packshot, cutdowns
+## Deferred
+- reference-image rendering: v1.3.0
+- scenes and shotlist: v1.2.0
+- prompt compiler: v1.2.0
+- video generation and assembly: v2.0.0

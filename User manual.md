@@ -1,72 +1,121 @@
-# Commercial Director v1.0.2 — User Manual
+# Commercial Director v1.1.0 — User Manual
 
-## 1. Start a campaign
-From **Projects**, choose **New Campaign** and add one clear product image. Brand and product names are optional.
+## 1. Build the campaign
+Start from one product image, review Product Intelligence and Identity Locks, complete the Creative Brief, then build the Campaign Bible and 20 concepts.
 
-Choose **Analyze product**. Fixture mode is deterministic; real-provider mode analyzes the uploaded image through the configured AI adapter.
+## 2. Shortlist production directions
+Open **Concepts** and shortlist between **1 and 5 concepts**.
 
-The original image is stored as a browser Blob in IndexedDB so large base64 data is not placed in localStorage.
+Asset Bible intentionally uses only selected concepts. If none are selected, Assets asks you to return to Concepts. If more than five are selected, narrow the production set first.
 
-## 2. Review Product Intelligence
-Review category, materials, colors, form, finish, perceived positioning, and the production-oriented summary.
+## 3. Open Assets
+Choose **Assets** in the project navigation.
 
-### Identity Locks
-Identity Locks mark visible features that downstream creative work should preserve, such as silhouette, cap, label, logo, product color, or material finish. Every lock remains reversible.
+The navigation order is:
 
-Choose **Continue to brief**.
+`Product → Brief → Campaign → Concepts → Assets`
 
-## 3. Complete the Creative Brief
-Set brand personality, audience, core benefit, emotional takeaway, mood, occasion/context, and constraints. Then choose **Build campaign**.
+Choose **Build Asset Bible**.
 
-The engine constructs one Campaign Bible, four Creative Territories, and exactly 20 concept slots.
+## 4. Review Product Sheet
+Product Sheet is the primary product-continuity contract.
 
-## 4. Review the Campaign Bible
-The Campaign Bible is shared campaign context: strategic idea and promise, audience, visual world, hero direction, environments, product behavior, palette, props, camera language, lighting, and sound.
+It records:
+- identity statement
+- features to preserve
+- form rules
+- materials/surface behavior
+- color/marking rules
+- scale and handling
+- preferred hero angles
+- prohibited substitutions/distortions
+- continuity locks
 
-Choose **View 20 concepts** to continue.
+Its stable key is `product-main`.
 
-## 5. Review 20 Concept Cards
-Each territory contains exactly one:
-1. Narrative
-2. Product spectacle
-3. Character
-4. Sensory
-5. Social
+## 5. Review Hero
+Hero records whether a recurring human/character presence is:
+- required
+- optional
+- none
 
-Use filters to compare territories. Bookmark controls update the shortlist. With PostgreSQL configured, shortlist state is server-persisted; otherwise the browser fallback is used.
+It also defines casting, grooming, performance, product relationship, continuity locks, and applicable shortlisted concepts.
 
-## 6. Develop and refine a concept
-Choose **Develop** on a card to review its hook, core idea, product role, audience takeaway, and 15-second treatment.
+Stable key: `hero-primary`.
 
-Quick refinements revise only the selected slot:
-- Make it bolder
-- Make it more luxurious
-- Reduce production complexity
-- Make the product more prominent
+If Hero is `none`, Wardrobe is empty.
 
-The initial concept and subsequent revisions are preserved. PostgreSQL environments keep this history server-side.
+## 6. Review Wardrobe
+Wardrobe contains zero to four reusable looks.
 
-### Pro Controls
-Pro Controls expose creative rationale, camera, lighting, continuity constraints, and required locations/props/VFX.
+Each look includes:
+- canonical stable key
+- silhouette
+- materials
+- palette
+- styling notes
+- continuity locks
+- applicable shortlisted concepts
 
-## 7. Persistence modes
-With `DATABASE_URL` configured, PostgreSQL is the runtime source of truth for projects, briefs, campaigns, concepts, shortlist state, revisions, and generation jobs.
+## 7. Review Locations
+The Asset Bible defines three to six reusable environments.
 
-Without `DATABASE_URL`, the typed localStorage fallback keeps the prototype runnable. IndexedDB continues to store the source image Blob.
+Each location includes spatial character, materials, palette, lighting window, practical cues, continuity locks, and concept applicability.
 
-## 8. AI engine behavior
-v1.0.2 retries individual model calls on transient or malformed structured-output failures. The engine validates the 4 × 5 concept matrix locally before model quality review, repairs only affected territories/slots, and never repeats a successful AI generation just because the database commit or job bookkeeping failed.
+## 8. Review Props
+The Asset Bible defines two to eight canonical production props.
 
-## 9. Current product boundary
-Commercial Director v1.0.2 does not render final images or videos. Its purpose is to determine which advertising directions deserve production.
+Each prop includes its production role, material/finish, palette, handling, staging, continuity locks, and applicable shortlisted concepts.
+
+## 9. Review Global Continuity
+Global Continuity separates:
+- campaign-wide rules that should remain consistent,
+- intentional differences/conflicts that should remain distinct,
+- practical production notes.
+
+## 10. Revisions
+Every generation creates an Asset Bible revision.
+
+The page shows:
+- Asset Bible revision
+- source Campaign revision
+- number of selected concepts
+- Current / Out of date status
+
+Choose **Regenerate** to append a new revision. Previous revisions are retained.
+
+## 11. Out-of-date status
+If the Campaign Bible or shortlist changes after an Asset Bible was generated, the previous Asset Bible is preserved but marked **Out of date**.
+
+Generate again to create a new revision from the current campaign and shortlist.
+
+## 12. What v1.1.0 does not do
+Asset Bible is a structured production specification. It does not yet create:
+- product reference renders
+- Hero images
+- wardrobe images
+- location images
+- prop images
+- scenes
+- shotlists
+- videos
+
+Scenes/shotlists arrive in v1.2.0. Reference asset generation arrives in v1.3.0.
+
+## Persistence
+With `DATABASE_URL` configured, Asset Bible revisions and generation jobs are stored in PostgreSQL.
+
+Without PostgreSQL, browser fallback preserves the same append-only revision model for local/fixture development.
 
 ## Developer verification
 
 ```bash
 npm install
-npm run test:e2e:install
 npm run db:push
-npm run verify
+npm run typecheck
+npm run lint
+npm run build
+npm run test:e2e
 ```
 
-GitHub Actions runs the same quality gate against PostgreSQL 17.
+GitHub Actions runs the same gate against PostgreSQL 17.

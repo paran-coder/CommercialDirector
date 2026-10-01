@@ -4,6 +4,7 @@ import type { CreativeBrief } from "@/domain/brief/schema";
 import type { CampaignBible, Territory } from "@/domain/campaign/schema";
 import type { Concept } from "@/domain/concept/schema";
 import type { ProductIntelligence } from "@/domain/product/schema";
+import type { AssetBible } from "@/domain/assets/schema";
 import { localProjectSnapshotSchema, type LocalProjectSnapshot } from "@/domain/project/schema";
 
 const PREFIX = "commercial-director:v1:project:";
@@ -78,13 +79,14 @@ export function createLocalProject(product: ProductIntelligence, metadata?: { br
     shortlist: [],
     campaignRevisions: [],
     conceptRevisions: [],
+    assetBibleRevisions: [],
   };
   return cacheLocalProject(snapshot, true);
 }
 
 export function updateLocalProject(
   id: string,
-  patch: Partial<Pick<LocalProjectSnapshot, "brandName" | "productName" | "product" | "brief" | "bible" | "territories" | "concepts" | "shortlist" | "campaignRevisions" | "conceptRevisions">>,
+  patch: Partial<Pick<LocalProjectSnapshot, "brandName" | "productName" | "product" | "brief" | "bible" | "territories" | "concepts" | "shortlist" | "campaignRevisions" | "conceptRevisions" | "assetBible" | "assetBibleRevisions">>,
 ) {
   if (!storageAvailable()) return null;
   const current = getLocalProject(id);
@@ -121,5 +123,31 @@ export function saveConceptRevision(id: string, concept: Concept, instruction: s
   return updateLocalProject(id, {
     concepts: current.concepts.map((item) => item.id === concept.id ? concept : item),
     conceptRevisions: [...seeded, { conceptId: concept.id, revision: nextRevision, instruction, data: concept, createdAt: new Date().toISOString() }],
+  });
+}
+
+
+export function saveAssetBibleRevision(
+  id: string,
+  assetBible: AssetBible,
+  sourceCampaignRevision: number,
+  sourceConceptKeys: string[],
+) {
+  const current = getLocalProject(id);
+  if (!current) return null;
+  const revisions = current.assetBibleRevisions ?? [];
+  const revision = revisions.length + 1;
+  return updateLocalProject(id, {
+    assetBible,
+    assetBibleRevisions: [
+      ...revisions,
+      {
+        revision,
+        sourceCampaignRevision,
+        sourceConceptKeys: [...new Set(sourceConceptKeys)],
+        data: assetBible,
+        createdAt: new Date().toISOString(),
+      },
+    ],
   });
 }

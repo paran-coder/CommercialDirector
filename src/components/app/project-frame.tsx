@@ -11,6 +11,7 @@ const items = [
   ["Brief", "brief"],
   ["Campaign", "campaign"],
   ["Concepts", "concepts"],
+  ["Assets", "assets"],
 ] as const;
 
 export function ProjectFrame({ projectId, active, children }: { projectId: string; active: string; children: React.ReactNode }) {
@@ -52,7 +53,7 @@ export function ProjectFrame({ projectId, active, children }: { projectId: strin
           ))}
         </nav>
         <div className="mt-8 hidden border-t border-[var(--line)] pt-5 text-xs leading-5 text-neutral-500 lg:block">
-          <p>v1.0.0 validates creative decisions before production rendering.</p>
+          <p>v1.1.0 turns selected concepts into a reusable production Asset Bible before rendering.</p>
         </div>
       </aside>
       <div className="min-w-0">{children}</div>
