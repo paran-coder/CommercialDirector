@@ -94,6 +94,8 @@ npm run test:e2e
 
 GitHub Actions additionally provisions PostgreSQL 17 and applies the Drizzle schema before running the gate. Playwright covers the DB-backed product → brief → campaign → 20 concepts → shortlist → concept refinement flow plus deterministic AI-engine tests for matrix structure, bounded model-call retry, and no-regeneration-on-persistence-failure behavior.
 
+The v1.0.2 release candidate passed the full PostgreSQL-backed CI gate on 2026-10-01. A real-provider smoke test remains environment/key-dependent and is not part of the deterministic release gate.
+
 ## Version
 
 Commercial-Director-v1.0.2

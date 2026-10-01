@@ -36,7 +36,7 @@
 - [x] Add task-level reasoning effort hints
 - [x] Add deterministic AI-engine regression tests
 - [x] Verify persistence failure does not rerun successful generation
-- [ ] Pass final PostgreSQL-backed CI gate
+- [x] Pass final PostgreSQL-backed CI gate
 
 ## Validation
 - [x] TypeScript typecheck in GitHub Actions
@@ -46,7 +46,8 @@
 - [x] DB-backed Playwright core flow
 - [x] Fixture 4 × 5 matrix regression
 - [x] Model-call retry regression
+- [x] Persistence-failure non-regeneration regression
 - [ ] Real-provider smoke test with API key
 
 ## Definition of done for v1.0.2
-All engine optimization items are implemented. Release approval requires the final PostgreSQL-backed CI gate to pass on the release commit.
+Completed. The AI engine optimization is implemented and the release candidate passed the full deterministic PostgreSQL-backed CI gate. The live-provider smoke test is explicitly outside the deterministic release gate because it requires external credentials and model usage.

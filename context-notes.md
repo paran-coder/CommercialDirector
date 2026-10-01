@@ -70,7 +70,9 @@ Modes:
 - Added deterministic Playwright/Node regression coverage for matrix validity, malformed-output retry, and persistence-failure non-regeneration.
 
 ## Validation
-GitHub Actions provisions PostgreSQL 17, runs `db:push`, then typecheck, ESLint, production build, and Playwright. v1.0.1 passed this full DB-backed gate. v1.0.2 release approval requires the same final gate after all engine changes.
+GitHub Actions provisions PostgreSQL 17, runs `db:push`, then TypeScript typecheck, ESLint, production build, and Playwright. The v1.0.2 release candidate passed the full DB-backed gate on 2026-10-01, including six Playwright tests covering the core flow and AI-engine invariants.
+
+A real OpenAI-provider smoke test remains optional because it requires a live API key and incurs external model usage; deterministic release approval does not depend on it.
 
 ## Future milestones
 - v1.1.0: Product/Hero/Wardrobe/Location/Prop asset bible
