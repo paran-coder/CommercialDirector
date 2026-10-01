@@ -161,6 +161,7 @@ export function saveProductionPlanRevision(
   sourceCampaignRevision: number,
   sourceAssetBibleRevision: number,
   sourceConceptKeys: string[],
+  sourceConceptRevisions: Record<string, number>,
 ) {
   const current = getLocalProject(id);
   if (!current) return null;
@@ -175,6 +176,7 @@ export function saveProductionPlanRevision(
         sourceCampaignRevision,
         sourceAssetBibleRevision,
         sourceConceptKeys: [...new Set(sourceConceptKeys)],
+        sourceConceptRevisions,
         data: productionPlan,
         createdAt: new Date().toISOString(),
       },
