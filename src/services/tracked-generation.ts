@@ -31,17 +31,27 @@ export async function runTrackedGeneration<T>(input: {
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     if (job && repository) await repository.markGenerationRunning(job.id, attempt);
 
+    let output: T;
     try {
-      const output = await input.operation();
-      if (job && repository) await repository.completeGeneration(job.id, output, attempt);
-      return { output, generationId: job?.id ?? null, attempts: attempt };
+      output = await input.operation();
     } catch (error) {
       lastError = error instanceof Error ? error.message : "Generation failed.";
       if (job && repository) {
         await repository.recordGenerationFailure(job.id, lastError, attempt, attempt === maxAttempts);
       }
       if (attempt === maxAttempts) throw new TrackedGenerationError(lastError, job?.id ?? null);
+      continue;
     }
+
+    if (job && repository) {
+      try {
+        await repository.completeGeneration(job.id, output, attempt);
+      } catch {
+        // The creative operation already succeeded. Never duplicate it solely to repair job bookkeeping.
+      }
+    }
+
+    return { output, generationId: job?.id ?? null, attempts: attempt };
   }
 
   throw new TrackedGenerationError(lastError, job?.id ?? null);
