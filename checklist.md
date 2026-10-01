@@ -59,7 +59,13 @@
 - [x] 핵심 한국어 UI E2E
 - [x] OG metadata E2E
 - [x] 자체 점검 — 9.7/10
-- [ ] Release-prep commit CI
-- [ ] PR / squash merge
-- [ ] main CI
-- [ ] dev/main 동기화
+- [x] Release-prep commit CI
+- [x] PR #6 / squash merge
+- [x] main CI
+- [x] dev/main 동기화
+
+
+## Release 기록
+- PR: #6 — Commercial Director v1.2.1 — Korean UX, Manual & OG
+- Squash merge commit: `ebc3a50ca227597fc79f3a47df19aa990db8e5e6`
+- Release main CI: 성공
