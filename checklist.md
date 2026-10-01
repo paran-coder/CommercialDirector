@@ -1,4 +1,4 @@
-# Commercial Director v1.0.0 — Implementation Checklist
+# Commercial Director v1.0.1 — Implementation Checklist
 
 ## Phase 0 — Project records
 - [x] Create context-notes.md
@@ -67,7 +67,12 @@
 - [x] Local campaign revision snapshots
 - [x] Local concept revision history preserving the initial concept
 - [x] Regeneration/refinement action contract
-- [ ] Wire runtime project repository to PostgreSQL when DATABASE_URL is enabled
+- [x] Wire runtime project repository to PostgreSQL when DATABASE_URL is enabled
+- [x] Add DB-first browser runtime adapter with local fallback
+- [x] Add transactional campaign persistence
+- [x] Persist concept revision history in PostgreSQL
+- [x] Persist shortlist state in PostgreSQL
+- [x] Add generation job state / attempts / failure recovery
 
 ## Phase 6 — Validation
 - [x] TypeScript syntax parse across all TS/TSX source files
@@ -75,15 +80,15 @@
 - [x] Verify exact fixture 4 × 5 concept matrix
 - [x] Verify fixture Identity Lock data
 - [x] Verify guided/pro information hierarchy in source implementation
-- [ ] Full TypeScript typecheck after dependencies install
-- [ ] ESLint after dependencies install
-- [ ] Production `next build` after dependencies install
+- [x] Full TypeScript typecheck in GitHub Actions
+- [x] ESLint in GitHub Actions
+- [x] Production `next build` in GitHub Actions
 - [x] Add Playwright fixture-flow E2E specification
-- [ ] Run Playwright fixture end-to-end smoke test after dependencies install
+- [x] Run Playwright end-to-end smoke test against PostgreSQL 17
 - [ ] Real-provider smoke test with API key
 
-## Environment limitation recorded
-`npm install --no-audit --no-fund` cannot reach the npm registry in this execution environment because outbound DNS/network access is unavailable. Dependency-backed checks therefore cannot run here. Source parsing, local import resolution, fixture matrix validation, upload guards, reversible Identity Locks, and an executable Playwright E2E spec were completed independently.
+## v1.0.1 validation
+CI provisions PostgreSQL 17, applies the Drizzle schema, and validates typecheck + lint + production build + Playwright E2E. The E2E verifies DB-backed campaign generation, shortlist persistence, generation-job success state, and concept revision persistence.
 
-## Definition of done for this implementation pass
-The source implements the full v1 guided flow, provider abstraction, 4×5 concept generation and repair strategy, product-image preservation, shortlist persistence, slot-level concept refinement, and a deterministic E2E test. v1.0.0 is **not yet baseline-approved** because the agreed gate requires typecheck + lint + build + E2E to execute successfully. PostgreSQL runtime wiring remains blocked behind that gate.
+## Definition of done for v1.0.1
+Completed. PostgreSQL is the runtime source of truth when configured, browser persistence remains the no-DB fallback, and the full CI gate passes against a real PostgreSQL service.
