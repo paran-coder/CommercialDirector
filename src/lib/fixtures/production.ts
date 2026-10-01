@@ -51,16 +51,16 @@ function createTreatment<D extends 15 | 30 | 45>(concept: Concept, duration: D):
   const b = round(duration * 0.68);
   return {
     duration,
-    logline: `\${concept.hook} \${duration}초 버전에서도 같은 핵심 메커니즘을 유지하고 제품이 payoff를 이끕니다.`,
+    logline: `${concept.hook} ${duration}초 버전에서도 같은 핵심 메커니즘을 유지하고 제품이 payoff를 이끕니다.`,
     pacing: duration === 15
       ? "즉시 이해되는 시각 Hook, 압축된 전개, 분명한 제품 payoff."
       : duration === 30
         ? "명확한 setup, 절제된 고조, 한 번의 반응 beat를 포함한 제품 중심 payoff."
         : "분위기 있는 setup, 더 충분한 전개, 추가 제품 디테일, 여유 있게 유지되는 payoff.",
     beats: [
-      { start: 0, end: a, beat: `Hook 설정: \${concept.hook}`, productRole: concept.productRole },
-      { start: a, end: b, beat: `메커니즘 전개: \${concept.idea.slice(0, 180)}`, productRole: concept.productRole },
-      { start: b, end: duration, beat: `제품과 타깃 인상으로 마무리: \${concept.audienceTakeaway}`, productRole: concept.productRole },
+      { start: 0, end: a, beat: `Hook 설정: ${concept.hook}`, productRole: concept.productRole },
+      { start: a, end: b, beat: `메커니즘 전개: ${concept.idea.slice(0, 180)}`, productRole: concept.productRole },
+      { start: b, end: duration, beat: `제품과 타깃 인상으로 마무리: ${concept.audienceTakeaway}`, productRole: concept.productRole },
     ],
   };
 }
@@ -122,7 +122,7 @@ function createShots(scenes: SceneDraft[]): ShotDraft[] {
         framing: scene.slot === 1 ? "절제된 미디엄 와이드 establishing frame" : "제품 중심의 의도적인 미디엄 또는 클로즈 frame",
         cameraMovement: "불필요한 핸드헬드 없이 이유 있는 느린 push 또는 lateral drift",
         lensIntent: "절제된 압축감을 가진 자연스러운 시네마틱 원근",
-        subjectAction: compactText(`${scene.action} Begin the scene action clearly and preserve spatial orientation.`, 320),
+        subjectAction: compactText(`${scene.action} Scene의 동작을 명확하게 시작하고 공간 방향을 유지합니다.`, 320),
         productVisibility: "제품은 product-main과 소재/형태가 일치하며 알아볼 수 있게 유지합니다.",
         lightingIntent: "Asset Bible의 조명 규칙과 제품 표면 반응을 유지합니다.",
         assetRefs: scene.assetRefs,
@@ -136,7 +136,7 @@ function createShots(scenes: SceneDraft[]): ShotDraft[] {
         framing: scene.slot === 3 ? "제품 중심으로 해결되는 close 또는 hero frame" : "더 타이트한 detail 또는 reaction frame",
         cameraMovement: "설정된 카메라 언어를 절제되게 이어갑니다.",
         lensIntent: "제품 기하를 왜곡하지 않는 범위에서 조금 더 타이트한 optical emphasis",
-        subjectAction: compactText(`${scene.action} Complete the scene action and hand off the intended continuity state.`, 320),
+        subjectAction: compactText(`${scene.action} Scene 동작을 마무리하고 의도한 continuity 상태를 다음으로 넘깁니다.`, 320),
         productVisibility: "제품 정체성과 라벨/실루엣 관계를 그대로 유지합니다.",
         lightingIntent: "설정된 광원 방향, 대비, practical light, 소재 반응을 맞춥니다.",
         assetRefs: scene.assetRefs,
