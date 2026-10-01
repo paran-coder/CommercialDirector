@@ -86,7 +86,7 @@ The page will show:
 - Current / Out of date state
 
 ## 10. Out-of-date behavior
-A Production Plan becomes out of date when its bound Campaign, Asset Bible, or shortlist changes.
+A Production Plan becomes out of date when its bound Campaign, Asset Bible, shortlist, or shortlisted Concept revision changes.
 
 The previous revision remains available as historical production planning, but a new revision should be generated from the current source.
 
