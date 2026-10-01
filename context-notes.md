@@ -1,4 +1,4 @@
-# Commercial Director v1.0.0 — Context Notes
+# Commercial Director v1.0.1 — Context Notes
 
 ## Product thesis
 Commercial Director turns one product image into a structured advertising decision system. v1.0.0 stops before expensive media generation and validates whether users can move from a product image to a strong shortlist of campaign directions.
@@ -143,3 +143,14 @@ Stabilization changes already applied:
 - Removed `next/font/google` to avoid a separate external font fetch during deterministic CI builds.
 
 Stage 1 PostgreSQL runtime work remains intentionally gated until the four baseline checks can actually run and pass.
+
+
+## v1.0.1 PostgreSQL runtime — completed
+- PostgreSQL is the runtime source of truth when DATABASE_URL is configured.
+- Browser localStorage remains a cache and DB-free fallback; source product image Blob storage remains in IndexedDB.
+- Added repository abstraction and PostgreSQL implementation for projects, briefs, campaigns, concept revisions, shortlist state, and generation jobs.
+- Campaign saves are transactional: campaign revision + territories + concepts + initial concept revisions are committed together.
+- Campaign and concept refinement generations record pending/running/succeeded/failed state, attempt count, error, and completion time.
+- Generation operations retry once by default; successful creative work is never repeated solely because tracking bookkeeping fails.
+- GitHub Actions now boots PostgreSQL 17, pushes the Drizzle schema, and runs the full E2E against DB-backed persistence.
+- v1.0.1 full CI gate passed on 2026-10-01.
