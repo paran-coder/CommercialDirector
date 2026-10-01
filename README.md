@@ -1,101 +1,113 @@
-# Commercial Director v1.0.2
+# Commercial Director v1.1.0 — Asset Bible planning
 
-Commercial Director is a creative decision system that turns one product image into a campaign foundation and 20 structured advertising directions.
+> `main` currently represents the released Commercial-Director-v1.0.2 baseline. This feature branch defines the v1.1.0 implementation before code changes begin.
 
-## Product flow
+Commercial Director is a creative decision system that turns one product image into a campaign foundation, 20 structured advertising directions, and—starting in v1.1.0—a reusable production Asset Bible for selected directions.
 
-`Product Image → Product Intelligence → Identity Locks → Creative Brief → Campaign Bible → 4 Territories → 20 Concepts → Shortlist → Concept Detail → Slot-level Refinement`
+## Planned v1.1.0 flow
 
-The current product intentionally ends before final image/video rendering. It validates the creative strategy and decision layer first.
+`Product → Brief → Campaign Bible → 20 Concepts → Shortlist 1–5 → Asset Bible`
 
-## Architecture
+The Asset Bible deliberately comes after shortlist. Production detail should be created for directions the user has chosen, not for all 20 concepts.
 
-- Next.js 16 App Router + TypeScript + React 19
-- Tailwind CSS
-- PostgreSQL 17 + Drizzle ORM
-- Zod domain contracts
-- Provider-agnostic AI orchestration
-- Deterministic fixture provider
-- OpenAI Responses API adapter with Structured Outputs
-- PostgreSQL runtime repository as source of truth when `DATABASE_URL` is configured
-- localStorage cache/fallback for DB-free development
-- IndexedDB Blob storage for the original product image
+## Asset Bible scope
 
-## AI generation pipeline
+v1.1.0 adds structured production specifications for:
 
-1. Product Analyst
-2. Campaign Strategist / Art Director
-3. Territory Generator
-4. Four parallel territory concept batches
-5. Deterministic 4 × 5 matrix validation
-6. Compact model-level quality review
-7. Targeted slot repair
+- Product Sheet
+- Hero
+- Wardrobe
+- Locations
+- Props
+- Global Continuity
 
-Each territory owns exactly one Narrative, Product Spectacle, Character, Sensory, and Social slot.
+This release does **not** generate final images or video.
 
-### v1.0.2 engine changes
+## Source of truth
 
-- Individual model calls retry once on transient/structured-output failures.
-- The 4 × 5 matrix is validated locally before model-level review.
-- Generated concept IDs are canonical: `<territory>-<execution-type>`.
-- Quality review omits treatment/pro-detail payload that is not needed for set-level review.
-- Slot repair receives same-territory peers plus only the most relevant cross-territory peers.
-- A successful AI result is never regenerated solely because persistence commit or job bookkeeping fails.
-- Provider-neutral reasoning hints map to OpenAI reasoning effort: strategy/quality tasks use `medium`; high-volume concept generation and repair use `low`.
+An Asset Bible revision is bound to:
+- one Campaign Bible revision,
+- a snapshot of 1–5 shortlisted concept stable keys.
 
-## Persistence
+If either source changes, the current Asset Bible is marked out of date. Regeneration creates a new revision rather than overwriting prior output.
 
-When `DATABASE_URL` is configured, project creation, product/brief updates, campaign revisions, territories, concepts, shortlist state, concept revisions, and generation jobs are persisted in PostgreSQL. Campaign saves are transactional.
+## Stable asset keys
 
-Without a database, the browser fallback remains available for local fixture development.
+Stable asset identity is assigned by application code, not trusted to free-form model naming.
 
-## Environment
+Examples:
+- `product-main`
+- `hero-primary`
+- `wardrobe-01`
+- `location-01`
+- `prop-01`
 
-Copy `.env.example` to `.env.local`.
+These keys become the contract that v1.2.0 scenes and shotlists can reference.
 
-Fixture mode:
+## Planned AI pipeline
 
-```bash
-AI_PROVIDER=fixture
-```
+Three role-specific structured generation jobs run from one compact source context:
 
-Real provider mode:
+1. Product Continuity Director → Product Sheet
+2. Casting & Styling Director → Hero + Wardrobe
+3. Production Designer → Locations + Props
 
-```bash
-AI_PROVIDER=openai
-OPENAI_API_KEY=...
-OPENAI_MODEL=gpt-5.6-terra
-```
+Independent calls run in parallel. Application code then canonicalizes stable keys and performs deterministic structural checks. A compact cross-asset review checks continuity and contradictions; only affected sections may be repaired.
 
-For PostgreSQL runtime:
+Existing v1.0.2 guarantees remain:
+- provider abstraction
+- Zod structured output
+- bounded per-call retry
+- reasoning-effort hints
+- no duplicate AI work after persistence failure
 
-```bash
-DATABASE_URL=postgresql://...
-npm run db:push
-```
+## Planned persistence
 
-## Development
+PostgreSQL gains `asset_bible_revisions` with:
+- project
+- revision
+- source campaign revision
+- source concept-key snapshot
+- full structured Asset Bible data
+- creation time
 
-```bash
-npm install
-npm run dev
-```
+The project runtime snapshot gains latest Asset Bible plus revision history. Browser fallback mirrors the append-only behavior.
 
-Open `http://localhost:3000`.
+Generation tracking gains `asset_bible`.
+
+## Planned UI
+
+New route:
+
+`/projects/[projectId]/assets`
+
+Navigation order:
+
+`Product → Brief → Campaign → Concepts → Assets`
+
+The page is an editorial production document, not an image gallery. It shows source/revision status followed by Product Sheet, Hero, Wardrobe, Locations, Props, and Global Continuity.
+
+Prerequisites:
+- campaign exists,
+- 1–5 concepts are shortlisted.
 
 ## Quality gate
 
+v1.1.0 is not merged to main until all of the following pass against PostgreSQL 17:
+
 ```bash
+npm run db:push
 npm run typecheck
 npm run lint
 npm run build
 npm run test:e2e
 ```
 
-GitHub Actions additionally provisions PostgreSQL 17 and applies the Drizzle schema before running the gate. Playwright covers the DB-backed product → brief → campaign → 20 concepts → shortlist → concept refinement flow plus deterministic AI-engine tests for matrix structure, bounded model-call retry, and no-regeneration-on-persistence-failure behavior.
+E2E must cover Asset Bible generation, DB hydration, generation-job state, revision append behavior, and out-of-date detection after shortlist changes.
 
-The v1.0.2 release candidate passed the full PostgreSQL-backed CI gate on 2026-10-01. A real-provider smoke test remains environment/key-dependent and is not part of the deterministic release gate.
+## Current status
 
-## Version
+Planning complete; implementation awaiting approval.
 
-Commercial-Director-v1.0.2
+Current release: Commercial-Director-v1.0.2  
+Feature target: Commercial-Director-v1.1.0
