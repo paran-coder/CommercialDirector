@@ -4,6 +4,7 @@ import { buildCampaign } from "../src/ai/orchestration";
 import { buildAssetBible } from "../src/ai/orchestration/assets";
 import { validateAssetBible } from "../src/ai/orchestration/asset-bible-quality";
 import { demoBrief, demoProduct } from "../src/lib/fixtures/demo";
+import { runTrackedGeneration, TrackedGenerationError } from "../src/services/tracked-generation";
 
 test("fixture Asset Bible uses canonical keys and shortlisted concept refs", async () => {
   const provider = new FixtureProvider();
@@ -65,4 +66,42 @@ test("Asset Bible generation rejects an invalid shortlist", async () => {
     concepts: campaign.concepts,
     shortlist: ["not-a-real-concept"],
   })).rejects.toThrow(/does not exist/i);
+});
+
+
+test("Asset Bible persistence failure does not rerun successful generation", async () => {
+  const provider = new FixtureProvider();
+  const campaign = await buildCampaign(provider, demoProduct, demoBrief);
+  const shortlist = campaign.concepts.slice(0, 2).map((concept) => concept.id);
+  let generationCalls = 0;
+  let commitCalls = 0;
+
+  let caught: unknown;
+  try {
+    await runTrackedGeneration({
+      kind: "asset_bible",
+      payload: { shortlist },
+      maxAttempts: 2,
+      operation: async () => {
+        generationCalls += 1;
+        return buildAssetBible(provider, {
+          product: demoProduct,
+          bible: campaign.bible,
+          territories: campaign.territories,
+          concepts: campaign.concepts,
+          shortlist,
+        });
+      },
+      commit: async () => {
+        commitCalls += 1;
+        throw new Error("database unavailable");
+      },
+    });
+  } catch (error) {
+    caught = error;
+  }
+
+  expect(caught).toBeInstanceOf(TrackedGenerationError);
+  expect(generationCalls).toBe(1);
+  expect(commitCalls).toBe(1);
 });
