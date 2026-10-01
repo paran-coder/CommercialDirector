@@ -25,13 +25,12 @@ export async function POST(request: Request) {
       projectId: repository ? dbProjectId : undefined,
       kind: "campaign",
       payload: { product: body.product, brief: body.brief },
-      operation: async () => {
-        const campaign = await buildCampaign(provider, body.product, body.brief);
-        if (repository && dbProjectId) {
-          await repository.saveCampaign(dbProjectId, { brief: body.brief, ...campaign });
-        }
-        return campaign;
-      },
+      operation: () => buildCampaign(provider, body.product, body.brief),
+      commit: repository && dbProjectId
+        ? async (campaign) => {
+            await repository.saveCampaign(dbProjectId, { brief: body.brief, ...campaign });
+          }
+        : undefined,
     });
 
     return Response.json({
