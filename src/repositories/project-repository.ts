@@ -2,9 +2,10 @@ import type { CreativeBrief } from "@/domain/brief/schema";
 import type { CampaignBible, Territory } from "@/domain/campaign/schema";
 import type { Concept } from "@/domain/concept/schema";
 import type { ProductIntelligence } from "@/domain/product/schema";
+import type { AssetBible } from "@/domain/assets/schema";
 import type { ProjectRuntimePatch, ProjectSnapshot } from "@/domain/project/schema";
 
-export type GenerationKind = "campaign" | "concept_refinement";
+export type GenerationKind = "campaign" | "concept_refinement" | "asset_bible";
 export type GenerationStatus = "pending" | "running" | "succeeded" | "failed";
 
 export interface GenerationJobRecord {
@@ -27,6 +28,12 @@ export interface CampaignSaveInput {
   concepts: Concept[];
 }
 
+export interface AssetBibleSaveInput {
+  assetBible: AssetBible;
+  sourceCampaignRevision: number;
+  sourceConceptKeys: string[];
+}
+
 export interface ProjectRepository {
   createProject(product: ProductIntelligence, metadata?: { brandName?: string; productName?: string }): Promise<ProjectSnapshot>;
   listProjects(): Promise<ProjectSnapshot[]>;
@@ -34,6 +41,7 @@ export interface ProjectRepository {
   updateProject(id: string, patch: ProjectRuntimePatch): Promise<ProjectSnapshot | null>;
   saveCampaign(id: string, result: CampaignSaveInput): Promise<ProjectSnapshot>;
   saveConceptRevision(id: string, concept: Concept, instruction: string): Promise<ProjectSnapshot>;
+  saveAssetBible(id: string, input: AssetBibleSaveInput): Promise<ProjectSnapshot>;
   setShortlist(id: string, conceptIds: string[]): Promise<ProjectSnapshot>;
   createGenerationJob(input: {
     projectId: string;
