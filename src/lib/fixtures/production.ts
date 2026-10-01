@@ -138,7 +138,7 @@ function createShots(scenes: SceneDraft[]): ShotDraft[] {
 }
 
 function assetRefsForConcept(concept: Concept, assetBible: AssetBible) {
-  const refs = [assetBible.productSheet.stableKey];
+  const refs: string[] = [assetBible.productSheet.stableKey];
   const location = assetBible.locations.find((item) => item.conceptRefs.includes(concept.id)) ?? assetBible.locations[0];
   if (location) refs.push(location.stableKey);
 
