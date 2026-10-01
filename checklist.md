@@ -9,81 +9,81 @@
 - [x] Approve v1.2.0 implementation plan
 
 ## Phase 1 — Production domain
-- [ ] Add Treatment schemas for 15/30/45 seconds
-- [ ] Add Scene Graph schema
-- [ ] Add Shot schema
-- [ ] Add Prompt IR schema
-- [ ] Add compiled prompt bundle schema
-- [ ] Add Production Plan schema
-- [ ] Add application-assigned canonical scene/shot keys
-- [ ] Add deterministic structural validator
-- [ ] Add source-binding/stale helper
+- [x] Add Treatment schemas for 15/30/45 seconds
+- [x] Add Scene Graph schema
+- [x] Add Shot schema
+- [x] Add Prompt IR schema
+- [x] Add compiled prompt bundle schema
+- [x] Add Production Plan schema
+- [x] Add application-assigned canonical scene/shot keys
+- [x] Add deterministic structural validator
+- [x] Add source-binding/stale helper
 
 ## Phase 2 — AI orchestration
-- [ ] Add Treatment Director prompt
-- [ ] Add Scene Director prompt
-- [ ] Add Shot Director prompt
-- [ ] Add Production Continuity Reviewer
-- [ ] Generate shortlisted concepts independently
-- [ ] Keep scene/shot dependency ordered within each concept
-- [ ] Add bounded targeted repair
-- [ ] Reuse model-call retry boundary
-- [ ] Add deterministic production fixture
+- [x] Add Treatment Director prompt
+- [x] Add Scene Director prompt
+- [x] Add Shot Director prompt
+- [x] Add Production Continuity Reviewer
+- [x] Generate shortlisted concepts independently
+- [x] Keep scene/shot dependency ordered within each concept
+- [x] Add bounded targeted repair
+- [x] Reuse model-call retry boundary
+- [x] Add deterministic production fixture
 
 ## Phase 3 — Prompt compiler
-- [ ] Build model-neutral Prompt IR from validated shots
-- [ ] Add generic cinematic compiler
-- [ ] Add Seedance compiler
-- [ ] Add Kling compiler
-- [ ] Add Veo compiler
-- [ ] Verify compiler never invents new asset/creative facts
-- [ ] Add compiler contract tests
+- [x] Build model-neutral Prompt IR from validated shots
+- [x] Add generic cinematic compiler
+- [x] Add Seedance compiler
+- [x] Add Kling compiler
+- [x] Add Veo compiler
+- [x] Verify compiler never invents new asset/creative facts
+- [x] Add compiler contract tests
 
 ## Phase 4 — Persistence/API
-- [ ] Add production_plan generation kind
-- [ ] Add production_plan_revisions table
-- [ ] Bind Campaign revision
-- [ ] Bind Asset Bible revision
-- [ ] Bind shortlisted concept keys
-- [ ] Add ProjectSnapshot production plan/revisions
-- [ ] Add browser fallback revision semantics
-- [ ] Add repository saveProductionPlan
-- [ ] Add production generation API
-- [ ] Reject source drift before persistence
+- [x] Add production_plan generation kind
+- [x] Add production_plan_revisions table
+- [x] Bind Campaign revision
+- [x] Bind Asset Bible revision
+- [x] Bind shortlisted concept keys
+- [x] Add ProjectSnapshot production plan/revisions
+- [x] Add browser fallback revision semantics
+- [x] Add repository saveProductionPlan
+- [x] Add production generation API
+- [x] Reject source drift before persistence
 
 ## Phase 5 — Production UI
-- [ ] Add Production to navigation
-- [ ] Add /projects/[projectId]/production route
-- [ ] Add missing/stale Asset Bible prerequisite state
-- [ ] Add selected-concept switcher
-- [ ] Add 15/30/45 treatment switcher
-- [ ] Add Scene Graph view
-- [ ] Add expandable Shotlist
-- [ ] Add Pro Controls for Prompt IR / provider prompts
-- [ ] Add Current / Out of date status
-- [ ] Add regeneration
-- [ ] Preserve restrained production-tool visual language
+- [x] Add Production to navigation
+- [x] Add /projects/[projectId]/production route
+- [x] Add missing/stale Asset Bible prerequisite state
+- [x] Add selected-concept switcher
+- [x] Add 15/30/45 treatment switcher
+- [x] Add Scene Graph view
+- [x] Add expandable Shotlist
+- [x] Add Pro Controls for Prompt IR / provider prompts
+- [x] Add Current / Out of date status
+- [x] Add regeneration
+- [x] Preserve restrained production-tool visual language
 
 ## Phase 6 — Tests
-- [ ] Treatment variants exactly 15/30/45
-- [ ] Canonical scene/shot key stability
-- [ ] Valid Asset Bible references only
-- [ ] Hero-none prohibits Hero/Wardrobe refs
-- [ ] Every scene has shots
-- [ ] Shot timing is monotonic
-- [ ] Shot duration sum matches treatment within tolerance
-- [ ] Prompt IR source identity matches shot
-- [ ] Provider compiler determinism
-- [ ] Persistence failure does not rerun successful AI work
-- [ ] DB-backed generation/hydration/revision/stale E2E
+- [x] Treatment variants exactly 15/30/45
+- [x] Canonical scene/shot key stability
+- [x] Valid Asset Bible references only
+- [x] Hero-none prohibits Hero/Wardrobe refs
+- [x] Every scene has shots
+- [x] Shot timing is monotonic
+- [x] Shot duration sum matches treatment within tolerance
+- [x] Prompt IR source identity matches shot
+- [x] Provider compiler determinism
+- [x] Persistence failure does not rerun successful AI work
+- [x] DB-backed generation/hydration/revision/stale E2E
 
 ## Release gate
-- [ ] PostgreSQL 17 db:push
-- [ ] TypeScript typecheck
-- [ ] ESLint
-- [ ] Next.js production build
-- [ ] Playwright full suite
-- [ ] Self-review completed
+- [x] PostgreSQL 17 db:push
+- [x] TypeScript typecheck
+- [x] ESLint
+- [x] Next.js production build
+- [x] Playwright full suite
+- [x] Self-review completed
 - [ ] Final release-preparation commit CI
 - [ ] Open PR to main
 - [ ] Squash merge after green CI
