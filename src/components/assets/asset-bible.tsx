@@ -70,7 +70,25 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
           body.sourceCampaignRevision,
           body.sourceConceptKeys,
         );
-        if (updated) setProject(updated);
+        if (updated) {
+          setProject(updated);
+        } else {
+          const revision = project.assetBibleRevisions.length + 1;
+          setProject({
+            ...project,
+            assetBible,
+            assetBibleRevisions: [
+              ...project.assetBibleRevisions,
+              {
+                revision,
+                sourceCampaignRevision: body.sourceCampaignRevision,
+                sourceConceptKeys: body.sourceConceptKeys,
+                data: assetBible,
+                createdAt: new Date().toISOString(),
+              },
+            ],
+          });
+        }
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Asset Bible generation failed.");
