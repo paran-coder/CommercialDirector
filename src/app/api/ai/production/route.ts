@@ -5,7 +5,7 @@ import { assetBibleSchema } from "@/domain/assets/schema";
 import { campaignBibleSchema, territorySchema } from "@/domain/campaign/schema";
 import { conceptSchema } from "@/domain/concept/schema";
 import { productIntelligenceSchema } from "@/domain/product/schema";
-import { isAssetBibleCurrent } from "@/domain/project/schema";
+import { getConceptRevisionSnapshot, isAssetBibleCurrent } from "@/domain/project/schema";
 import { getProjectRepository } from "@/repositories";
 import { runTrackedGeneration, TrackedGenerationError } from "@/services/tracked-generation";
 
@@ -21,6 +21,7 @@ const requestSchema = z.object({
   assetBible: assetBibleSchema,
   sourceCampaignRevision: z.number().int().positive(),
   sourceAssetBibleRevision: z.number().int().positive(),
+  sourceConceptRevisions: z.record(z.string(), z.number().int().positive()),
 });
 
 export async function POST(request: Request) {
@@ -47,6 +48,9 @@ export async function POST(request: Request) {
     const assetBible = serverProject?.assetBible ?? body.assetBible;
     const sourceCampaignRevision = serverProject?.campaignRevisions.at(-1)?.revision ?? body.sourceCampaignRevision;
     const sourceAssetBibleRevision = serverProject?.assetBibleRevisions.at(-1)?.revision ?? body.sourceAssetBibleRevision;
+    const sourceConceptRevisions = serverProject
+      ? getConceptRevisionSnapshot(serverProject, shortlist)
+      : body.sourceConceptRevisions;
 
     if (!product || !bible || !territories || !concepts || !assetBible || !sourceCampaignRevision || !sourceAssetBibleRevision) {
       return Response.json({ error: "Complete a current Asset Bible before Production Planning." }, { status: 409 });
@@ -62,6 +66,7 @@ export async function POST(request: Request) {
         sourceCampaignRevision,
         sourceAssetBibleRevision,
         sourceConceptKeys: shortlist,
+        sourceConceptRevisions,
       },
       operation: () => buildProductionPlan(provider, {
         product,
@@ -81,7 +86,8 @@ export async function POST(request: Request) {
               !isAssetBibleCurrent(current) ||
               currentCampaignRevision !== sourceCampaignRevision ||
               currentAssetBibleRevision !== sourceAssetBibleRevision ||
-              !sameSet(current.shortlist, shortlist)
+              !sameSet(current.shortlist, shortlist) ||
+              !sameRevisionSnapshot(getConceptRevisionSnapshot(current, shortlist), sourceConceptRevisions)
             ) {
               throw new Error("Campaign, Asset Bible, or shortlist changed while the Production Plan was being generated. Generate again from the current source.");
             }
@@ -90,6 +96,7 @@ export async function POST(request: Request) {
               sourceCampaignRevision,
               sourceAssetBibleRevision,
               sourceConceptKeys: shortlist,
+              sourceConceptRevisions,
             });
           }
         : undefined,
@@ -103,6 +110,7 @@ export async function POST(request: Request) {
       sourceCampaignRevision,
       sourceAssetBibleRevision,
       sourceConceptKeys: shortlist,
+      sourceConceptRevisions,
       ...generated.output,
     });
   } catch (error) {
@@ -116,4 +124,10 @@ function sameSet(left: string[], right: string[]) {
   const a = [...new Set(left)].sort();
   const b = [...new Set(right)].sort();
   return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+
+function sameRevisionSnapshot(left: Record<string, number>, right: Record<string, number>) {
+  const keys = [...new Set([...Object.keys(left), ...Object.keys(right)])].sort();
+  return keys.every((key) => left[key] === right[key]);
 }
