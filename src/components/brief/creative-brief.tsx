@@ -11,7 +11,7 @@ import { saveCampaignResult } from "@/lib/project-store";
 import { getRuntimeProject, updateRuntimeProject } from "@/lib/runtime-project-store";
 import { Button } from "@/components/ui/button";
 
-const personalityOptions = ["럭셔리", "미니멀", "대담함", "젊음", "테크니컬", "유쾌함", "내추럴", "스포티"];
+const personalityOptions = ["럭셔리", "미니멀", "감각적", "대담함", "젊음", "테크니컬", "유쾌함", "내추럴", "스포티"];
 const moodOptions = ["신비로운", "친밀한", "시네마틱", "도발적인", "우아한", "에너지 넘치는"];
 const fragranceOccasions = ["데이트/저녁 외출", "파티", "혼자만의 의식", "특별한 날", "일상"];
 
