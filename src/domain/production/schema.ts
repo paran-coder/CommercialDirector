@@ -20,8 +20,12 @@ export const treatmentDraftSchema = z.object({
   beats: z.array(treatmentBeatSchema).min(3).max(12),
 });
 
+const treatment15DraftSchema = treatmentDraftSchema.extend({ duration: z.literal(15) });
+const treatment30DraftSchema = treatmentDraftSchema.extend({ duration: z.literal(30) });
+const treatment45DraftSchema = treatmentDraftSchema.extend({ duration: z.literal(45) });
+
 export const treatmentGenerationSchema = z.object({
-  treatments: z.array(treatmentDraftSchema).length(3),
+  treatments: z.tuple([treatment15DraftSchema, treatment30DraftSchema, treatment45DraftSchema]),
 });
 
 export const sceneDraftSchema = z.object({
@@ -43,7 +47,11 @@ export const sceneVariantDraftSchema = z.object({
 });
 
 export const sceneGenerationSchema = z.object({
-  variants: z.array(sceneVariantDraftSchema).length(3),
+  variants: z.tuple([
+    sceneVariantDraftSchema.extend({ duration: z.literal(15) }),
+    sceneVariantDraftSchema.extend({ duration: z.literal(30) }),
+    sceneVariantDraftSchema.extend({ duration: z.literal(45) }),
+  ]),
 });
 
 export const shotDraftSchema = z.object({
@@ -67,7 +75,11 @@ export const shotVariantDraftSchema = z.object({
 });
 
 export const shotGenerationSchema = z.object({
-  variants: z.array(shotVariantDraftSchema).length(3),
+  variants: z.tuple([
+    shotVariantDraftSchema.extend({ duration: z.literal(15) }),
+    shotVariantDraftSchema.extend({ duration: z.literal(30) }),
+    shotVariantDraftSchema.extend({ duration: z.literal(45) }),
+  ]),
 });
 
 export const treatmentSchema = treatmentDraftSchema.extend({
