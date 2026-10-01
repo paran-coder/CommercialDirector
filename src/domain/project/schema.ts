@@ -3,6 +3,7 @@ import { creativeBriefSchema } from "@/domain/brief/schema";
 import { campaignBibleSchema, territorySchema } from "@/domain/campaign/schema";
 import { conceptSchema } from "@/domain/concept/schema";
 import { productIntelligenceSchema } from "@/domain/product/schema";
+import { assetBibleSchema } from "@/domain/assets/schema";
 
 export const campaignRevisionSchema = z.object({
   revision: z.number().int().positive(),
@@ -17,6 +18,14 @@ export const conceptRevisionSchema = z.object({
   revision: z.number().int().positive(),
   instruction: z.string().min(1),
   data: conceptSchema,
+  createdAt: z.string().min(1),
+});
+
+export const assetBibleRevisionSchema = z.object({
+  revision: z.number().int().positive(),
+  sourceCampaignRevision: z.number().int().positive(),
+  sourceConceptKeys: z.array(z.string().min(1)).min(1).max(5),
+  data: assetBibleSchema,
   createdAt: z.string().min(1),
 });
 
@@ -35,6 +44,8 @@ export const localProjectSnapshotSchema = z.object({
   shortlist: z.array(z.string()).default([]),
   campaignRevisions: z.array(campaignRevisionSchema).default([]),
   conceptRevisions: z.array(conceptRevisionSchema).default([]),
+  assetBible: assetBibleSchema.optional(),
+  assetBibleRevisions: z.array(assetBibleRevisionSchema).default([]),
 });
 
 export const projectRuntimePatchSchema = z.object({
@@ -54,3 +65,13 @@ export type LocalProjectSnapshot = z.infer<typeof localProjectSnapshotSchema>;
 export type ProjectSnapshot = LocalProjectSnapshot;
 export type ProjectRuntimePatch = z.infer<typeof projectRuntimePatchSchema>;
 export type CampaignRevisionData = z.infer<typeof campaignRevisionDataSchema>;
+
+export function isAssetBibleCurrent(project: ProjectSnapshot) {
+  const latest = project.assetBibleRevisions.at(-1);
+  if (!latest || !project.assetBible) return false;
+  const campaignRevision = project.campaignRevisions.at(-1)?.revision;
+  if (campaignRevision !== latest.sourceCampaignRevision) return false;
+  const current = [...new Set(project.shortlist)].sort();
+  const source = [...new Set(latest.sourceConceptKeys)].sort();
+  return current.length === source.length && current.every((id, index) => id === source[index]);
+}
