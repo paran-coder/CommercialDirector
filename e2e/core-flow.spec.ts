@@ -35,7 +35,7 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
 });
 
 test("demo concept refinement controls remain reachable", async ({ page }) => {
-  await page.goto("/projects/demo-aurelia/concepts/concept-07");
+  await page.goto("/projects/demo-aurelia/concepts/concept-06");
   await expect(page.getByRole("heading", { name: "Last Elevator" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Make it bolder" })).toBeVisible();
   await page.getByRole("button", { name: "Pro controls" }).click();

@@ -34,12 +34,10 @@ export function ConceptGrid({ projectId, concepts: fallbackConcepts, territories
   const indexById = useMemo(() => new Map(concepts.map((concept, index) => [concept.id, index + 1])), [concepts]);
 
   function toggle(id: string) {
-    setShortlist((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      updateLocalProject(projectId, { shortlist: Array.from(next) });
-      return next;
-    });
+    const next = new Set(shortlist);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setShortlist(next);
+    updateLocalProject(projectId, { shortlist: Array.from(next) });
   }
 
   if (!loaded) return <div className="page-wrap"><p className="text-sm text-neutral-500">Loading concepts…</p></div>;
