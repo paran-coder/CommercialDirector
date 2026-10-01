@@ -34,12 +34,18 @@ export async function GET(request: Request) {
       return Response.json({ error: "프로젝트를 찾을 수 없습니다." }, { status: 404 });
     }
 
-    const state = await referenceAssetRepository.getLatestRevisionState(projectId, "product-main");
+    const referenceAsset = await referenceAssetRepository.getLatestRevision(projectId, "product-main");
+    const currentAssetBibleRevision = project.assetBibleRevisions.at(-1)?.revision;
+    const current = Boolean(
+      referenceAsset
+      && isAssetBibleCurrent(project)
+      && currentAssetBibleRevision === referenceAsset.sourceAssetBibleRevision,
+    );
     const continuityChecks = await referenceAssetRepository.listContinuityChecks(projectId, "product-main");
 
     return Response.json({
-      referenceAsset: state?.revision ?? null,
-      current: state?.current ?? false,
+      referenceAsset,
+      current,
       continuityChecks,
     });
   } catch (error) {
