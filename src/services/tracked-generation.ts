@@ -15,6 +15,7 @@ export async function runTrackedGeneration<T>(input: {
   maxAttempts?: number;
   operation(): Promise<T>;
   commit?(output: T): Promise<void>;
+  jobOutput?(output: T): unknown;
 }) {
   const maxAttempts = Math.max(1, Math.min(input.maxAttempts ?? 2, 3));
   const repository = input.projectId ? getProjectRepository() : null;
@@ -58,7 +59,11 @@ export async function runTrackedGeneration<T>(input: {
 
     if (job && repository) {
       try {
-        await repository.completeGeneration(job.id, output, attempt);
+        await repository.completeGeneration(
+          job.id,
+          input.jobOutput ? input.jobOutput(output) : output,
+          attempt,
+        );
       } catch {
         // Generation and persistence already succeeded. Job bookkeeping must not trigger duplicate AI work.
       }
