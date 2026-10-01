@@ -102,10 +102,10 @@
 - [x] Next.js production build
 - [x] Playwright full suite on feature implementation
 - [x] Self-review completed
-- [ ] Final release-preparation commit CI
-- [ ] Open PR to main
-- [ ] Squash merge only after final green CI
-- [ ] Re-sync dev/main baseline after merge
+- [x] Final release-preparation commit CI
+- [x] Open PR to main (#4)
+- [x] Squash merge only after final green CI
+- [x] Re-sync dev/main baseline after merge
 
 ## Explicitly deferred
 - [ ] Real reference-image rendering — v1.3.0
