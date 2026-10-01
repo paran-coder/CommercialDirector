@@ -41,16 +41,16 @@ export function createAssetBibleFixture(input: {
       "모든 setup에서 Identity Lock 특징을 알아볼 수 있게 유지합니다.",
     ],
     formRules: [
-      `원본 형태(\${input.product.visual.form})의 기하와 비율을 유지합니다.`,
+      `원본 형태(${input.product.visual.form})의 기하와 비율을 유지합니다.`,
       "Shot 사이에서 패키지 형태를 늘리거나 눌러 변형하지 않습니다.",
     ],
     materialsAndSurface: [
-      ...input.product.visual.materials.map((material) => `\${material} 소재가 실제처럼 빛에 반응하도록 표현합니다.`),
-      ...input.product.visual.finish.map((finish) => `조명이 바뀌어도 \${finish} 마감 특성을 유지합니다.`),
+      ...input.product.visual.materials.map((material) => `${material} 소재가 실제처럼 빛에 반응하도록 표현합니다.`),
+      ...input.product.visual.finish.map((finish) => `조명이 바뀌어도 ${finish} 마감 특성을 유지합니다.`),
     ].slice(0, 8),
     colorAndMarkingRules: [
-      `주요 제품 색상은 \${input.product.visual.primaryColor}로 유지합니다.`,
-      `보조 제품 색상은 \${input.product.visual.secondaryColor}로 유지합니다.`,
+      `주요 제품 색상은 ${input.product.visual.primaryColor}로 유지합니다.`,
+      `보조 제품 색상은 ${input.product.visual.secondaryColor}로 유지합니다.`,
       "라벨/로고 위치와 대비는 원본 제품과 일치시킵니다.",
     ],
     scaleAndHandling: [
@@ -68,11 +68,11 @@ export function createAssetBibleFixture(input: {
       "원본 소재를 일반 플라스틱이나 크롬으로 바꾸지 않습니다.",
     ],
     continuityLocks: [
-      "Silhouette",
-      "Cap geometry",
-      "Label and logo placement",
-      "Primary/secondary product colors",
-      "Material finish",
+      "실루엣",
+      "캡 형태",
+      "라벨/로고 위치",
+      "주요/보조 제품 색상",
+      "소재 마감",
     ],
   };
 
@@ -80,8 +80,8 @@ export function createAssetBibleFixture(input: {
     applicability: heroNeeded ? "required" : "none",
     role: heroNeeded ? input.bible.hero.persona : "선택한 Concept에는 사람 Hero가 필요하지 않습니다.",
     castingDirection: heroNeeded ? `${input.bible.hero.ageRange}; ${input.bible.hero.persona}.` : "해당 없음.",
-    appearanceAndGrooming: heroNeeded ? "과한 포인트 없이 절제되고 현대적인 그루밍을 유지합니다." : "Not applicable.",
-    performanceDirection: heroNeeded ? "절제된 자신감과 정확한 움직임을 유지하고 전형적인 뷰티 광고 포즈는 피합니다." : "Not applicable.",
+    appearanceAndGrooming: heroNeeded ? "과한 포인트 없이 절제되고 현대적인 그루밍을 유지합니다." : "해당 없음.",
+    performanceDirection: heroNeeded ? "절제된 자신감과 정확한 움직임을 유지하고 전형적인 뷰티 광고 포즈는 피합니다." : "해당 없음.",
     relationshipToProduct: heroNeeded ? "Hero는 제품을 의도적인 개인 소지품처럼 다루며, 핸들링은 구체적이고 차분하며 Concept의 원인과 연결됩니다." : "사람 주인공 없이 제품이 시각적 내러티브를 이끕니다.",
     continuityLocks: heroNeeded
       ? ["캐스팅 정체성", "헤어 형태", "메이크업 마감", "주얼리 계열", "절제된 퍼포먼스"]
@@ -105,12 +105,12 @@ export function createAssetBibleFixture(input: {
   const fallbackLocations = input.bible.locations.slice(0, 3);
   const locationEntries = [...locationRefs.entries()];
   const locationNames = [...new Set([...locationEntries.map(([name]) => name), ...fallbackLocations])].slice(0, 6);
-  while (locationNames.length < 3) locationNames.push(`캠페인 환경 \${locationNames.length + 1}`);
+  while (locationNames.length < 3) locationNames.push(`캠페인 환경 ${locationNames.length + 1}`);
 
   const locations: LocationDraft[] = locationNames.map((label) => ({
     label,
     environmentType: label,
-    spatialDescription: `캠페인의 \${input.bible.visualWorld.keywords.slice(0, 3).join(", ")} 세계관 안에서 \${label}을 절제되게 해석한 공간입니다.`,
+    spatialDescription: `캠페인의 ${input.bible.visualWorld.keywords.slice(0, 3).join(", ")} 세계관 안에서 ${label}을 절제되게 해석한 공간입니다.`,
     materials: ["어두운 건축 표면", "선별된 반사 디테일"],
     palette: input.bible.palette.slice(0, 5),
     lightingWindow: input.bible.lighting[0] ?? "절제된 로우키 조명",
@@ -122,7 +122,7 @@ export function createAssetBibleFixture(input: {
   const fallbackProps = input.bible.props.slice(0, 2);
   const propEntries = [...propRefs.entries()];
   const propNames = [...new Set([...propEntries.map(([name]) => name), ...fallbackProps])].slice(0, 8);
-  while (propNames.length < 2) propNames.push(`캠페인 Prop \${propNames.length + 1}`);
+  while (propNames.length < 2) propNames.push(`캠페인 Prop ${propNames.length + 1}`);
 
   const props: PropDraft[] = propNames.map((label) => ({
     label,
