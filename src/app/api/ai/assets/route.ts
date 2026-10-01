@@ -61,6 +61,11 @@ export async function POST(request: Request) {
       }),
       commit: repository
         ? async (result) => {
+            const current = await repository.getProject(body.projectId);
+            const currentCampaignRevision = current?.campaignRevisions.at(-1)?.revision;
+            if (!current || currentCampaignRevision !== sourceCampaignRevision || !sameSet(current.shortlist, shortlist)) {
+              throw new Error("Campaign or shortlist changed while the Asset Bible was being generated. Generate again from the current selection.");
+            }
             await repository.saveAssetBible(body.projectId, {
               assetBible: result.assetBible,
               sourceCampaignRevision,
@@ -84,4 +89,11 @@ export async function POST(request: Request) {
     const generationId = error instanceof TrackedGenerationError ? error.generationId : null;
     return Response.json({ error: message, generationId }, { status: error instanceof z.ZodError ? 400 : 500 });
   }
+}
+
+
+function sameSet(left: string[], right: string[]) {
+  const a = [...new Set(left)].sort();
+  const b = [...new Set(right)].sort();
+  return a.length === b.length && a.every((value, index) => value === b[index]);
 }
