@@ -69,6 +69,7 @@ export function buildPromptIR(input: PromptIRInput): PromptIR {
     duration: input.duration,
     sceneKey: input.shot.sceneKey,
     shotKey: input.shot.stableKey,
+    shotDuration: input.shot.end - input.shot.start,
     assetRefs: input.shot.assetRefs,
     subject: input.shot.productVisibility,
     action: input.shot.subjectAction,
@@ -173,7 +174,7 @@ function compile(ir: PromptIR, provider: CompiledPrompt["provider"], sections: A
     prompt: sections.filter((item): item is string => Boolean(item)).join("\n"),
     negativePrompt: ir.negativeConstraints.join("; "),
     parameters: {
-      durationSeconds: Number((ir.end ?? 0)) || ir.duration,
+      durationSeconds: ir.shotDuration,
     },
   });
 }
