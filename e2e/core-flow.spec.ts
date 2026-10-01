@@ -82,7 +82,7 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
 
   const currentShortlist = projectBody.project.shortlist as string[];
   const additionalConcept = projectBody.project.concepts.find((concept: { id: string }) => !currentShortlist.includes(concept.id));
-  expect(additionalConcept).toBeTruthy();
+  if (!additionalConcept) throw new Error("Expected an additional concept for stale-state verification.");
 
   const shortlistResponse = await page.request.put(`/api/projects/${projectId}/shortlist`, {
     data: { conceptIds: [...currentShortlist, additionalConcept.id] },
