@@ -11,16 +11,38 @@ Commercial Director v1.2.1은 v1.2.0 Production Planning 기능은 그대로 유
 - Header / 프로젝트 navigation에 매뉴얼 진입점 추가
 - Open Graph / Twitter metadata에 `/og-image.png` 예약
 - OG 이미지 권장 크기 1200×630
+- `html lang="ko"` 적용
+- 주요 API 사용자 오류 문구 한국어화
 
 ## 언어 원칙
 
-사용자가 판단하고 읽어야 하는 설명은 한국어를 우선한다. 반면 canonical key, stable key, provider 이름, Prompt IR, 실제 영상 모델에 전달되는 compiled prompt 등 제작 파이프라인 계약은 영문을 유지한다.
+사용자가 판단하고 읽어야 하는 버튼, 설명, 상태, AI 자유 서술 필드는 한국어를 우선한다.
+
+다음 제작 계약은 영문 또는 원래 식별자를 유지한다.
+- Commercial Director
+- Campaign Bible / Asset Bible / Product Sheet
+- Hero / Wardrobe / Scene Graph / Shotlist / Prompt IR
+- Seedance / Kling / Veo
+- canonical key / stable key
+- schema enum, concept ID, provider/model 이름
+
+Provider용 compiled prompt는 같은 Prompt IR의 내용을 그대로 보존하므로 한국어 서술과 영문 기술 구문이 함께 포함될 수 있다. Compiler는 새로운 창작 사실을 추가하지 않는다.
 
 기존 저장 revision은 보존한다. 이미 생성된 영문 Campaign/Concept/Asset Bible/Production Plan을 자동 변환하지 않으며 재생성되는 결과부터 한국어 생성 지시를 적용한다.
 
 ## 사용자 매뉴얼
 
-앱에서 `/manual`을 열면 전체 흐름과 각 단계의 목적, shortlist/revision/stale 상태, Asset Bible, Production Plan, Prompt IR 사용법을 확인할 수 있다.
+앱에서 `/manual`을 열면 다음을 확인할 수 있다.
+- Product → Brief → Campaign → Concepts → Assets → Production 전체 흐름
+- Identity Locks
+- shortlist
+- Campaign Bible / Asset Bible
+- 15/30/45초 Treatment
+- Scene Graph / Shotlist
+- Prompt IR / provider prompt
+- revision
+- Current / Out of date
+- 문제 해결
 
 ## OG 이미지
 
@@ -30,16 +52,22 @@ Commercial Director v1.2.1은 v1.2.0 Production Planning 기능은 그대로 유
 
 권장 크기: **1200×630**
 
-metadata 태그는 v1.2.1에서 미리 등록한다.
+v1.2.1 metadata에는 이미 다음이 등록되어 있다.
+- Open Graph image: `/og-image.png`
+- width: `1200`
+- height: `630`
+- Twitter card: `summary_large_image`
+
+실제 배포 도메인은 `NEXT_PUBLIC_SITE_URL`을 권장하며, 없으면 Vercel production/preview URL을 사용하고 로컬에서는 `http://localhost:3000`으로 fallback한다.
 
 ## Quality gate
 
-```bash
-npm run typecheck
-npm run lint
-npm run build
-npm run test:e2e
-```
+Feature implementation 기준:
+- PostgreSQL schema push — 성공
+- TypeScript — 성공
+- ESLint — 성공
+- Next.js production build — 성공
+- Playwright — **16/16 성공**
 
 ## Version
 
