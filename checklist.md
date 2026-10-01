@@ -1,97 +1,58 @@
-# Commercial Director v1.2.0 — Implementation Checklist
+# Commercial Director v1.2.1 — Korean UX / Manual / OG Checklist
 
-## Phase 0 — Plan and contracts
-- [x] Create v1.2.0 feature branch from released main
-- [x] Update context-notes.md
-- [x] Update checklist.md
-- [x] Update README.md
-- [x] Update User manual.md
-- [x] Approve v1.2.0 implementation plan
+## Phase 0 — 계획
+- [x] v1.2.1 feature branch 생성
+- [x] context-notes.md 갱신
+- [x] checklist.md 갱신
+- [x] README.md 갱신
+- [x] User manual.md 갱신
+- [x] 한국어 UX / 상세 매뉴얼 / OG metadata 범위 승인
 
-## Phase 1 — Production domain
-- [x] Add Treatment schemas for 15/30/45 seconds
-- [x] Add Scene Graph schema
-- [x] Add Shot schema
-- [x] Add Prompt IR schema
-- [x] Add compiled prompt bundle schema
-- [x] Add Production Plan schema
-- [x] Add application-assigned canonical scene/shot keys
-- [x] Add deterministic structural validator
-- [x] Add source-binding/stale helper
+## Phase 1 — 한국어 UI
+- [ ] Root html lang을 ko로 변경
+- [ ] Header / 프로젝트 목록 한국어화
+- [ ] Product 업로드/분석 화면 한국어화
+- [ ] Creative Brief 화면 한국어화
+- [ ] Campaign Bible 화면 한국어화
+- [ ] Concepts / Concept Detail 화면 한국어화
+- [ ] Asset Bible 화면 한국어화
+- [ ] Production 화면 한국어화
+- [ ] 일반 상태/오류/빈 상태 한국어화
+- [ ] 핵심 제작 용어 영문 유지/병기
 
-## Phase 2 — AI orchestration
-- [x] Add Treatment Director prompt
-- [x] Add Scene Director prompt
-- [x] Add Shot Director prompt
-- [x] Add Production Continuity Reviewer
-- [x] Generate shortlisted concepts independently
-- [x] Keep scene/shot dependency ordered within each concept
-- [x] Add bounded targeted repair
-- [x] Reuse model-call retry boundary
-- [x] Add deterministic production fixture
+## Phase 2 — AI 사용자 결과 언어
+- [ ] Product Analyst 사용자 필드 한국어 지시
+- [ ] Campaign / Territory / Concept 사용자 필드 한국어 지시
+- [ ] Asset Bible 사용자 필드 한국어 지시
+- [ ] Treatment / Scene / Shot 사용자 필드 한국어 지시
+- [ ] compiled provider prompt 영문 유지 지시
+- [ ] fixture/demo 핵심 콘텐츠 한국어화
 
-## Phase 3 — Prompt compiler
-- [x] Build model-neutral Prompt IR from validated shots
-- [x] Add generic cinematic compiler
-- [x] Add Seedance compiler
-- [x] Add Kling compiler
-- [x] Add Veo compiler
-- [x] Verify compiler never invents new asset/creative facts
-- [x] Add compiler contract tests
+## Phase 3 — 상세 사용자 매뉴얼 페이지
+- [ ] /manual route 추가
+- [ ] 전체 워크플로 설명
+- [ ] 단계별 화면 설명
+- [ ] shortlist / revision / stale 설명
+- [ ] Asset Bible 상세 설명
+- [ ] Production Plan 상세 설명
+- [ ] Prompt IR / provider prompt 설명
+- [ ] 문제 해결 섹션
+- [ ] Header에서 접근 링크
+- [ ] 프로젝트 navigation에서 접근 링크
 
-## Phase 4 — Persistence/API
-- [x] Add production_plan generation kind
-- [x] Add production_plan_revisions table
-- [x] Bind Campaign revision
-- [x] Bind Asset Bible revision
-- [x] Bind shortlisted concept keys
-- [x] Add ProjectSnapshot production plan/revisions
-- [x] Add browser fallback revision semantics
-- [x] Add repository saveProductionPlan
-- [x] Add production generation API
-- [x] Reject source drift before persistence
+## Phase 4 — OG metadata
+- [ ] title/description 한국어 보정
+- [ ] Open Graph image /og-image.png 등록
+- [ ] 1200×630 dimensions 등록
+- [ ] Twitter summary_large_image 등록
+- [ ] 실제 이미지 미존재 상태에서도 build 가능 확인
 
-## Phase 5 — Production UI
-- [x] Add Production to navigation
-- [x] Add /projects/[projectId]/production route
-- [x] Add missing/stale Asset Bible prerequisite state
-- [x] Add selected-concept switcher
-- [x] Add 15/30/45 treatment switcher
-- [x] Add Scene Graph view
-- [x] Add expandable Shotlist
-- [x] Add Pro Controls for Prompt IR / provider prompts
-- [x] Add Current / Out of date status
-- [x] Add regeneration
-- [x] Preserve restrained production-tool visual language
-
-## Phase 6 — Tests
-- [x] Treatment variants exactly 15/30/45
-- [x] Canonical scene/shot key stability
-- [x] Valid Asset Bible references only
-- [x] Hero-none prohibits Hero/Wardrobe refs
-- [x] Every scene has shots
-- [x] Shot timing is monotonic
-- [x] Shot duration sum matches treatment within tolerance
-- [x] Prompt IR source identity matches shot
-- [x] Provider compiler determinism
-- [x] Persistence failure does not rerun successful AI work
-- [x] DB-backed generation/hydration/revision/stale E2E
-
-## Release gate
-- [x] PostgreSQL 17 db:push
-- [x] TypeScript typecheck
-- [x] ESLint
-- [x] Next.js production build
-- [x] Playwright full suite
-- [x] Self-review completed
-- [x] Final release-preparation commit CI
-- [x] Open PR to main
-- [x] Squash merge after green CI
-- [x] Re-sync dev/main baseline
-
-## Explicitly deferred
-- [ ] Asset reference image rendering — v1.3.0
-- [ ] Generated-media continuity inspection — v1.3.0
-- [ ] Image/video generation — v2.0.0
-- [ ] Timeline assembly — v2.0.0
-- [ ] Live-provider smoke test with external credentials
+## Phase 5 — 검증
+- [ ] TypeScript typecheck
+- [ ] ESLint
+- [ ] Production build
+- [ ] Playwright 전체 suite
+- [ ] 매뉴얼 route E2E
+- [ ] 핵심 한국어 UI E2E
+- [ ] 자체 점검
+- [ ] PR / merge / dev 동기화
