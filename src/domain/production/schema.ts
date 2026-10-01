@@ -91,6 +91,7 @@ export const promptIRSchema = z.object({
   duration: productionDurationSchema,
   sceneKey: z.string().min(1),
   shotKey: z.string().min(1),
+  shotDuration: z.number().positive().max(20),
   assetRefs,
   subject: z.string().min(4).max(260),
   action: z.string().min(4).max(320),
