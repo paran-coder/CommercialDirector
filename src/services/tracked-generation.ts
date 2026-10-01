@@ -14,6 +14,7 @@ export async function runTrackedGeneration<T>(input: {
   payload: unknown;
   maxAttempts?: number;
   operation(): Promise<T>;
+  commit?(output: T): Promise<void>;
 }) {
   const maxAttempts = Math.max(1, Math.min(input.maxAttempts ?? 2, 3));
   const repository = input.projectId ? getProjectRepository() : null;
@@ -35,7 +36,7 @@ export async function runTrackedGeneration<T>(input: {
     try {
       output = await input.operation();
     } catch (error) {
-      lastError = error instanceof Error ? error.message : "Generation failed.";
+      lastError = messageFrom(error, "Generation failed.");
       if (job && repository) {
         await repository.recordGenerationFailure(job.id, lastError, attempt, attempt === maxAttempts);
       }
@@ -43,11 +44,23 @@ export async function runTrackedGeneration<T>(input: {
       continue;
     }
 
+    if (input.commit) {
+      try {
+        await input.commit(output);
+      } catch (error) {
+        lastError = `Persistence failed after successful generation: ${messageFrom(error, "Unknown persistence error")}`;
+        if (job && repository) {
+          await repository.recordGenerationFailure(job.id, lastError, attempt, true);
+        }
+        throw new TrackedGenerationError(lastError, job?.id ?? null);
+      }
+    }
+
     if (job && repository) {
       try {
         await repository.completeGeneration(job.id, output, attempt);
       } catch {
-        // The creative operation already succeeded. Never duplicate it solely to repair job bookkeeping.
+        // Generation and persistence already succeeded. Job bookkeeping must not trigger duplicate AI work.
       }
     }
 
@@ -55,4 +68,8 @@ export async function runTrackedGeneration<T>(input: {
   }
 
   throw new TrackedGenerationError(lastError, job?.id ?? null);
+}
+
+function messageFrom(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback;
 }
