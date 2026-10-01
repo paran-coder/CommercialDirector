@@ -2,8 +2,16 @@ import { index, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, un
 
 export const projectStatus = pgEnum("project_status", ["draft", "briefing", "generated", "archived"]);
 export const executionType = pgEnum("execution_type", ["narrative", "product_spectacle", "character", "sensory", "social"]);
-export const generationKind = pgEnum("generation_kind", ["campaign", "concept_refinement", "asset_bible", "production_plan"]);
+export const generationKind = pgEnum("generation_kind", [
+  "campaign",
+  "concept_refinement",
+  "asset_bible",
+  "production_plan",
+  "reference_asset",
+  "continuity_check",
+]);
 export const generationStatus = pgEnum("generation_status", ["pending", "running", "succeeded", "failed"]);
+export const referenceAssetKind = pgEnum("reference_asset_kind", ["product", "hero", "wardrobe", "location", "prop"]);
 
 export const workspaces = pgTable("workspaces", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -53,6 +61,32 @@ export const assetBibleRevisions = pgTable("asset_bible_revisions", {
   data: jsonb("data").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [uniqueIndex("asset_bible_revision_unique").on(table.projectId, table.revision)]);
+
+export const referenceAssetRevisions = pgTable("reference_asset_revisions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  stableKey: text("stable_key").notNull(),
+  kind: referenceAssetKind("kind").notNull(),
+  revision: integer("revision").notNull(),
+  sourceAssetBibleRevision: integer("source_asset_bible_revision").notNull(),
+  data: jsonb("data").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("reference_asset_revision_unique").on(table.projectId, table.stableKey, table.revision),
+  index("reference_asset_project_stable_key_idx").on(table.projectId, table.stableKey),
+]);
+
+export const continuityChecks = pgTable("continuity_checks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  stableKey: text("stable_key").notNull(),
+  referenceAssetRevision: integer("reference_asset_revision").notNull(),
+  sourceAssetBibleRevision: integer("source_asset_bible_revision").notNull(),
+  data: jsonb("data").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("continuity_checks_project_stable_key_idx").on(table.projectId, table.stableKey),
+]);
 
 export const productionPlanRevisions = pgTable("production_plan_revisions", {
   id: uuid("id").defaultRandom().primaryKey(),
