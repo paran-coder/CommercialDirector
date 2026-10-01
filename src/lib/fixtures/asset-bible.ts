@@ -109,7 +109,7 @@ export function createAssetBibleFixture(input: {
 
   const locations: LocationDraft[] = locationNames.map((label) => ({
     label,
-    environmentType: label,
+    environmentType: `${label} 공간`,
     spatialDescription: `캠페인의 ${input.bible.visualWorld.keywords.slice(0, 3).join(", ")} 세계관 안에서 ${label}을 절제되게 해석한 공간입니다.`,
     materials: ["어두운 건축 표면", "선별된 반사 디테일"],
     palette: input.bible.palette.slice(0, 5),
