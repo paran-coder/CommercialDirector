@@ -6,7 +6,7 @@ import { ArrowRight, ImagePlus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ProductIntelligence } from "@/domain/product/schema";
 import { Button } from "@/components/ui/button";
-import { createLocalProject } from "@/lib/project-store";
+import { createRuntimeProject } from "@/lib/runtime-project-store";
 import { putProductImage } from "@/lib/product-image-store";
 
 export function ProductUpload() {
@@ -63,7 +63,7 @@ export function ProductUpload() {
 
   async function continueToProject() {
     if (!analysis) return;
-    const project = createLocalProject(analysis, { brandName, productName });
+    const project = await createRuntimeProject(analysis, { brandName, productName });
     if (file) {
       try { await putProductImage(project.id, file); } catch { /* Metadata flow can continue if browser blob storage is unavailable. */ }
     }

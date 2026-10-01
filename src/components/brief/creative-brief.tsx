@@ -7,7 +7,8 @@ import type { CreativeBrief } from "@/domain/brief/schema";
 import { creativeBriefSchema } from "@/domain/brief/schema";
 import type { ProductIntelligence } from "@/domain/product/schema";
 import { demoProduct } from "@/lib/fixtures/demo";
-import { getLocalProject, saveCampaignResult, updateLocalProject } from "@/lib/project-store";
+import { saveCampaignResult } from "@/lib/project-store";
+import { getRuntimeProject, updateRuntimeProject } from "@/lib/runtime-project-store";
 import { Button } from "@/components/ui/button";
 
 const personalityOptions = ["Luxury", "Minimal", "Bold", "Youthful", "Technical", "Playful", "Natural", "Sport"];
@@ -27,8 +28,7 @@ export function CreativeBriefView({ projectId, initial }: { projectId: string; i
 
   useEffect(() => {
     let cancelled = false;
-    const local = getLocalProject(projectId);
-    queueMicrotask(() => {
+    void getRuntimeProject(projectId).then((local) => {
       if (cancelled) return;
       if (local?.brief) setBrief(local.brief);
       else if (local) setBrief(emptyBrief);
@@ -58,12 +58,12 @@ export function CreativeBriefView({ projectId, initial }: { projectId: string; i
       return;
     }
     setLoading(true);
-    updateLocalProject(projectId, { brief: parsed.data });
+    await updateRuntimeProject(projectId, { brief: parsed.data });
     try {
       const response = await fetch("/api/ai/campaign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product, brief: parsed.data }),
+        body: JSON.stringify({ projectId, product, brief: parsed.data }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Campaign generation failed");

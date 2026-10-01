@@ -1,4 +1,4 @@
-# Commercial Director v1.0.0
+# Commercial Director v1.0.1
 
 Commercial Director is a creative decision system that turns one product image into a campaign foundation and 20 structured advertising directions.
 
@@ -22,7 +22,8 @@ The application serves brand/marketing users and creative/production professiona
 - Provider-agnostic AI orchestration
 - Deterministic fixture provider for local development
 - OpenAI Responses API adapter for real structured generation
-- Browser project snapshot fallback for DB-free prototyping
+- PostgreSQL runtime repository as the source of truth when DATABASE_URL is configured
+- Browser project snapshot cache/fallback for DB-free prototyping
 - IndexedDB blob storage for the uploaded source product image
 
 ## AI generation model
@@ -68,7 +69,7 @@ OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-5.6-terra
 ```
 
-`DATABASE_URL` is already defined for the Drizzle/PostgreSQL schema, but this prototype pass uses browser snapshots as the runnable fallback. Wiring the project repository to PostgreSQL is the remaining production-persistence step.
+`DATABASE_URL` enables the PostgreSQL runtime repository. Project creation, product/brief updates, campaign saves, concept revisions, shortlist state, and generation jobs are persisted transactionally. Without a database, the browser fallback remains available for fixture/local development.
 
 ## Development
 
@@ -92,25 +93,22 @@ npm run test:e2e
 npm run verify
 ```
 
-## Validation status for this artifact
+## Validation status
 
-Completed in the build environment:
+GitHub Actions validates every dev/main push against a real PostgreSQL 17 service:
 
-- 45 TypeScript/TSX files (including E2E/config files) parsed successfully with the TypeScript compiler
-- All `@/` local imports resolve to source files
-- Fixture contract verified as exactly 4 territories × 5 execution types = 20 concepts
-- Identity Lock fixture propagation verified at the source-data level
+- Drizzle schema push
+- TypeScript typecheck
+- ESLint
+- Next.js production build
+- Playwright core-flow E2E
+- DB-backed project creation and hydration
+- Campaign and concept generation job persistence
+- Concept revision persistence
+- Shortlist persistence
 
-Not completed in the build environment:
-
-- `npm install`, `next build`, ESLint, full typecheck, and browser E2E could not run because this execution environment has no outbound npm-registry network/DNS access
-- Real-provider smoke test requires an API key
-- Browser-level end-to-end smoke test is authored in `e2e/core-flow.spec.ts` and requires installed dependencies plus Playwright Chromium
-
-## Baseline status
-
-The source stabilization pass is complete, but v1.0.0 is not baseline-approved until `npm run verify` succeeds in an environment with npm registry access. Stage 1 PostgreSQL runtime wiring intentionally does not begin before that gate passes.
+The v1.0.1 CI gate is passing.
 
 ## Version
 
-Commercial-Director-v1.0.0
+Commercial-Director-v1.0.1

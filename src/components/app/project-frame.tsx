@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { demoProject } from "@/lib/fixtures/demo";
-import { getLocalProject } from "@/lib/project-store";
+import { getRuntimeProject } from "@/lib/runtime-project-store";
 import { cx } from "@/lib/utils";
 
 const items = [
@@ -17,13 +17,18 @@ export function ProjectFrame({ projectId, active, children }: { projectId: strin
   const [name, setName] = useState(() => projectId === "demo-aurelia" ? { brandName: demoProject.brandName, productName: demoProject.productName } : { brandName: "Campaign", productName: "Loading project…" });
 
   useEffect(() => {
+    let cancelled = false;
     const update = () => {
-      const project = getLocalProject(projectId);
-      if (project) setName({ brandName: project.brandName, productName: project.productName });
+      void getRuntimeProject(projectId).then((project) => {
+        if (!cancelled && project) setName({ brandName: project.brandName, productName: project.productName });
+      });
     };
     update();
     window.addEventListener("commercial-director:project-updated", update);
-    return () => window.removeEventListener("commercial-director:project-updated", update);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("commercial-director:project-updated", update);
+    };
   }, [projectId]);
 
   return (

@@ -1,4 +1,4 @@
-# Commercial Director v1.0.0 — User Manual
+# Commercial Director v1.0.1 — User Manual
 
 ## 1. Start a campaign
 From **Projects**, select **New Campaign**. Add one clear product image. Brand and product names are optional.
@@ -110,3 +110,9 @@ npm run verify
 ```
 
 The baseline is accepted only when typecheck, lint, production build, and the fixture E2E flow all pass.
+
+
+## PostgreSQL runtime (v1.0.1)
+When DATABASE_URL is configured, new projects use server persistence automatically. Product intelligence, briefs, campaign revisions, 20 concepts, shortlist state, concept refinements, and generation status survive browser/device sessions. Without DATABASE_URL the app keeps the local prototype fallback.
+
+For local PostgreSQL development, set DATABASE_URL and run `npm run db:push` before `npm run dev`.

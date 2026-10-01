@@ -6,7 +6,8 @@ import Link from "next/link";
 import type { Concept } from "@/domain/concept/schema";
 import type { Territory } from "@/domain/campaign/schema";
 import { demoConcepts, demoTerritories } from "@/lib/fixtures/demo";
-import { getLocalProject, saveConceptRevision, updateLocalProject } from "@/lib/project-store";
+import { getLocalProject, saveConceptRevision } from "@/lib/project-store";
+import { getRuntimeProject, setRuntimeShortlist } from "@/lib/runtime-project-store";
 import { executionLabel } from "@/lib/utils";
 
 export function ConceptDetail({ projectId, conceptId }: { projectId: string; conceptId: string }) {
@@ -24,10 +25,9 @@ export function ConceptDetail({ projectId, conceptId }: { projectId: string; con
 
   useEffect(() => {
     let cancelled = false;
-    const local = getLocalProject(projectId);
-    const localConcept = local?.concepts?.find((item) => item.id === conceptId);
-    queueMicrotask(() => {
+    void getRuntimeProject(projectId).then((local) => {
       if (cancelled) return;
+      const localConcept = local?.concepts?.find((item) => item.id === conceptId);
       if (local && localConcept) {
         setConcept(localConcept);
         setTerritory(local.territories?.find((item) => item.id === localConcept.territoryId) ?? null);
@@ -42,7 +42,7 @@ export function ConceptDetail({ projectId, conceptId }: { projectId: string; con
   }, [conceptId, projectId]);
 
   async function refine(instruction: string) {
-    const local = getLocalProject(projectId);
+    const local = await getRuntimeProject(projectId);
     if (!local?.bible || !local.territories || !local.concepts) {
       setRevisionError("Refinement is available on campaigns generated from your own brief.");
       return;
@@ -53,7 +53,7 @@ export function ConceptDetail({ projectId, conceptId }: { projectId: string; con
       const response = await fetch("/api/ai/concept", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bible: local.bible, territories: local.territories, concepts: local.concepts, conceptId, instruction }),
+        body: JSON.stringify({ projectId, bible: local.bible, territories: local.territories, concepts: local.concepts, conceptId, instruction }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Concept revision failed");
@@ -76,7 +76,7 @@ export function ConceptDetail({ projectId, conceptId }: { projectId: string; con
     const nextSaved = !saved;
     const next = new Set(local.shortlist);
     if (nextSaved) next.add(conceptId); else next.delete(conceptId);
-    updateLocalProject(projectId, { shortlist: Array.from(next) });
+    void setRuntimeShortlist(projectId, Array.from(next));
     setSaved(nextSaved);
   }
 

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Bookmark, ArrowUpRight } from "lucide-react";
 import type { Concept } from "@/domain/concept/schema";
 import type { Territory } from "@/domain/campaign/schema";
-import { getLocalProject, updateLocalProject } from "@/lib/project-store";
+import { getRuntimeProject, setRuntimeShortlist } from "@/lib/runtime-project-store";
 import { cx, executionLabel } from "@/lib/utils";
 
 export function ConceptGrid({ projectId, concepts: fallbackConcepts, territories: fallbackTerritories }: { projectId: string; territories: Territory[]; concepts: Concept[] }) {
@@ -18,8 +18,7 @@ export function ConceptGrid({ projectId, concepts: fallbackConcepts, territories
 
   useEffect(() => {
     let cancelled = false;
-    const local = getLocalProject(projectId);
-    queueMicrotask(() => {
+    void getRuntimeProject(projectId).then((local) => {
       if (cancelled) return;
       if (local?.concepts) { setConcepts(local.concepts); setReady(true); }
       else if (local) setReady(false);
@@ -37,7 +36,7 @@ export function ConceptGrid({ projectId, concepts: fallbackConcepts, territories
     const next = new Set(shortlist);
     if (next.has(id)) next.delete(id); else next.add(id);
     setShortlist(next);
-    updateLocalProject(projectId, { shortlist: Array.from(next) });
+    void setRuntimeShortlist(projectId, Array.from(next));
   }
 
   if (!loaded) return <div className="page-wrap"><p className="text-sm text-neutral-500">Loading concepts…</p></div>;

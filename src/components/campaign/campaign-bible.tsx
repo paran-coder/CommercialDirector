@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { CampaignBible, Territory } from "@/domain/campaign/schema";
-import { getLocalProject } from "@/lib/project-store";
+import { getRuntimeProject } from "@/lib/runtime-project-store";
 import { Button } from "@/components/ui/button";
 
 export function CampaignBibleView({ projectId, fallback, fallbackTerritories }: { projectId: string; fallback: CampaignBible; fallbackTerritories: Territory[] }) {
@@ -17,8 +17,7 @@ export function CampaignBibleView({ projectId, fallback, fallbackTerritories }: 
 
   useEffect(() => {
     let cancelled = false;
-    const local = getLocalProject(projectId);
-    queueMicrotask(() => {
+    void getRuntimeProject(projectId).then((local) => {
       if (cancelled) return;
       if (local?.bible) { setBible(local.bible); setReady(true); }
       else if (local) setReady(false);

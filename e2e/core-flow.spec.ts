@@ -13,6 +13,7 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
   await page.getByRole("button", { name: /Create campaign/ }).click();
 
   await expect(page.getByRole("heading", { name: "What must remain recognizable." })).toBeVisible();
+  const projectId = new URL(page.url()).pathname.split("/")[2];
   await page.getByRole("button", { name: /Continue to brief/ }).click();
 
   await page.getByRole("button", { name: "Luxury" }).click();
@@ -32,6 +33,19 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
   const first = page.getByTestId("concept-card").first();
   await first.getByRole("button", { name: "Toggle shortlist" }).click();
   await expect(page.getByText("1 shortlisted")).toBeVisible();
+
+  await first.getByRole("link", { name: /Develop/ }).click();
+  await expect(page.getByRole("button", { name: "Make it bolder" })).toBeVisible();
+  await page.getByRole("button", { name: "Make it bolder" }).click();
+  await expect(page.getByText(/1 revision saved/)).toBeVisible();
+
+  const jobsResponse = await page.request.get(`/api/projects/${projectId}/generations`);
+  expect(jobsResponse.ok()).toBeTruthy();
+  const jobsBody = await jobsResponse.json();
+  expect(jobsBody.generations).toEqual(expect.arrayContaining([
+    expect.objectContaining({ kind: "campaign", status: "succeeded" }),
+    expect.objectContaining({ kind: "concept_refinement", status: "succeeded" }),
+  ]));
 });
 
 test("demo concept refinement controls remain reachable", async ({ page }) => {

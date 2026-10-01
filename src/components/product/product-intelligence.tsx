@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ProductIntelligence } from "@/domain/product/schema";
-import { getLocalProject, updateLocalProject } from "@/lib/project-store";
+import { getRuntimeProject, updateRuntimeProject } from "@/lib/runtime-project-store";
 import { getProductImage } from "@/lib/product-image-store";
 import { Button } from "@/components/ui/button";
 
@@ -19,9 +19,7 @@ export function ProductIntelligenceView({ projectId, fallback }: { projectId: st
   useEffect(() => {
     let objectUrl: string | null = null;
     let cancelled = false;
-    const local = getLocalProject(projectId);
-
-    queueMicrotask(() => {
+    void getRuntimeProject(projectId).then((local) => {
       if (cancelled || !local?.product) return;
       setProduct(local.product);
       setLocks(new Set(local.product.identityLocks));
@@ -43,14 +41,12 @@ export function ProductIntelligenceView({ projectId, fallback }: { projectId: st
   const availableLocks: ProductIntelligence["identityLocks"][number][] = ["silhouette", "cap", "label", "logo", "product_color", "material_finish"];
 
   function toggle(lock: ProductIntelligence["identityLocks"][number]) {
-    setLocks((current) => {
-      const next = new Set(current);
-      if (next.has(lock)) next.delete(lock); else next.add(lock);
-      const nextProduct = { ...product, identityLocks: Array.from(next) };
-      setProduct(nextProduct);
-      updateLocalProject(projectId, { product: nextProduct });
-      return next;
-    });
+    const next = new Set(locks);
+    if (next.has(lock)) next.delete(lock); else next.add(lock);
+    const nextProduct = { ...product, identityLocks: Array.from(next) };
+    setLocks(next);
+    setProduct(nextProduct);
+    void updateRuntimeProject(projectId, { product: nextProduct });
   }
 
   if (!loaded) return <div className="page-wrap"><p className="text-sm text-neutral-500">Loading product intelligence…</p></div>;

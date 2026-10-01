@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { demoProject } from "@/lib/fixtures/demo";
-import { listLocalProjects } from "@/lib/project-store";
+import { listRuntimeProjects } from "@/lib/runtime-project-store";
 import type { LocalProjectSnapshot } from "@/domain/project/schema";
 
 export function ProjectsDashboard() {
@@ -12,8 +12,8 @@ export function ProjectsDashboard() {
 
   useEffect(() => {
     let cancelled = false;
-    queueMicrotask(() => {
-      if (!cancelled) setProjects(listLocalProjects());
+    void listRuntimeProjects().then((items) => {
+      if (!cancelled) setProjects(items);
     });
     return () => { cancelled = true; };
   }, []);
