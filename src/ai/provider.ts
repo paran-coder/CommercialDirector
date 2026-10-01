@@ -1,5 +1,7 @@
 import type { ZodType } from "zod";
 
+export type ReasoningEffort = "none" | "low" | "medium" | "high";
+
 export type GenerateObjectRequest<T> = {
   name: string;
   schema: ZodType<T>;
@@ -7,6 +9,7 @@ export type GenerateObjectRequest<T> = {
   prompt: string;
   imageDataUrl?: string;
   fixture: T;
+  reasoningEffort?: ReasoningEffort;
 };
 
 export interface AIProvider {
