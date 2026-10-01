@@ -75,10 +75,42 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
   await page.getByRole("button", { name: "Regenerate" }).click();
   await expect(page.getByText("Revision 2", { exact: true })).toBeVisible();
 
+  await page.goto(`/projects/${projectId}/production`);
+  await expect(page.getByRole("heading", { name: "Turn selected concepts into executable shots." })).toBeVisible();
+  await page.getByRole("button", { name: "Build Production Plan" }).click();
+
+  await expect(page.getByRole("heading", { name: "Production Plan" })).toBeVisible();
+  await expect(page.getByText("Revision 1", { exact: true })).toBeVisible();
+  await expect(page.getByText("Assets r2", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "15s" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "30s" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "45s" })).toBeVisible();
+  await expect(page.getByText(/3 scenes · 6 shots/)).toBeVisible();
+
+  await page.getByRole("button", { name: "Pro controls" }).click();
+  await expect(page.getByRole("heading", { name: "Model-neutral source → provider text" })).toBeVisible();
+  await page.getByRole("button", { name: "seedance" }).click();
+  await expect(page.getByText("seedance", { exact: true }).first()).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("Revision 1", { exact: true })).toBeVisible();
+  await expect(page.getByText("Current", { exact: true })).toBeVisible();
+
+  const productionJobsResponse = await page.request.get(`/api/projects/${projectId}/generations`);
+  expect(productionJobsResponse.ok()).toBeTruthy();
+  const productionJobsBody = await productionJobsResponse.json();
+  expect(productionJobsBody.generations).toEqual(expect.arrayContaining([
+    expect.objectContaining({ kind: "production_plan", status: "succeeded" }),
+  ]));
+
+  await page.getByRole("button", { name: "Regenerate" }).click();
+  await expect(page.getByText("Revision 2", { exact: true })).toBeVisible();
+
   const projectResponse = await page.request.get(`/api/projects/${projectId}`);
   expect(projectResponse.ok()).toBeTruthy();
   const projectBody = await projectResponse.json();
   expect(projectBody.project.assetBibleRevisions).toHaveLength(2);
+  expect(projectBody.project.productionPlanRevisions).toHaveLength(2);
 
   const currentShortlist = projectBody.project.shortlist as string[];
   const additionalConcept = projectBody.project.concepts.find((concept: { id: string }) => !currentShortlist.includes(concept.id));
@@ -90,6 +122,13 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
   expect(shortlistResponse.ok()).toBeTruthy();
 
   await page.reload();
+  await expect(page.getByText("Out of date", { exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Regenerate" }).click();
+  await expect(page.getByText("Revision 3", { exact: true })).toBeVisible();
+  await expect(page.getByText("Current", { exact: true })).toBeVisible();
+
+  await page.goto(`/projects/${projectId}/production`);
   await expect(page.getByText("Out of date", { exact: true })).toBeVisible();
 });
 
