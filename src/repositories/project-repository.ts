@@ -40,6 +40,7 @@ export interface ProductionPlanSaveInput {
   sourceCampaignRevision: number;
   sourceAssetBibleRevision: number;
   sourceConceptKeys: string[];
+  sourceConceptRevisions: Record<string, number>;
 }
 
 export interface ProjectRepository {
