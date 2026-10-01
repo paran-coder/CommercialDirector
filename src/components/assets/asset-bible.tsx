@@ -204,7 +204,7 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
       <AssetSection number="02" title="Hero" description={assetBible.hero.role}>
         <AssetHeader stableKey={assetBible.hero.stableKey} conceptRefs={assetBible.hero.conceptRefs}/>
         <div className="mt-5 grid gap-px overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--line)] md:grid-cols-2">
-          <TextCell title="필요 여부" body={assetBible.hero.applicability}/>
+          <TextCell title="필요 여부" body={applicabilityLabel(assetBible.hero.applicability)}/>
           <TextCell title="캐스팅" body={assetBible.hero.castingDirection}/>
           <TextCell title="외형과 그루밍" body={assetBible.hero.appearanceAndGrooming}/>
           <TextCell title="연기/퍼포먼스" body={assetBible.hero.performanceDirection}/>
@@ -368,4 +368,11 @@ function ListCell({ title, items }: { title: string; items: string[] }) {
 
 function TextCell({ title, body }: { title: string; body: string }) {
   return <div className="bg-white p-5 sm:p-6"><p className="meta">{title}</p><p className="mt-3 text-sm leading-6 text-neutral-600">{body}</p></div>;
+}
+
+
+function applicabilityLabel(value: "required" | "optional" | "none") {
+  if (value === "required") return "필수";
+  if (value === "optional") return "선택";
+  return "필요 없음";
 }
