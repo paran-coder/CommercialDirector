@@ -34,6 +34,7 @@ export async function analyzeProduct(provider: AIProvider, imageDataUrl?: string
     prompt: "Analyze this product image for advertising pre-production. Describe only visible attributes and create conservative identity locks.",
     imageDataUrl,
     fixture: demoProduct,
+    reasoningEffort: "low",
   });
 }
 
@@ -49,6 +50,7 @@ export async function buildCampaign(
     instructions: CAMPAIGN_BIBLE_INSTRUCTIONS,
     prompt: `PRODUCT\n${JSON.stringify(product)}\n\nBRIEF\n${JSON.stringify(checkedBrief)}`,
     fixture: demoBible,
+    reasoningEffort: "medium",
   });
 
   const territoryResult = await generateObjectWithRetry(provider, {
@@ -57,6 +59,7 @@ export async function buildCampaign(
     instructions: TERRITORY_INSTRUCTIONS,
     prompt: `Create exactly four territories from this campaign bible. Assign slot 1-4 and stable kebab-case IDs.\n${JSON.stringify(bible)}`,
     fixture: { territories: demoTerritories },
+    reasoningEffort: "medium",
   });
 
   const territories = normalizeTerritories(territoryResult.territories);
@@ -89,6 +92,7 @@ export async function buildCampaign(
     instructions: QUALITY_REVIEW_INSTRUCTIONS,
     prompt: JSON.stringify(createQualityReviewPayload(bible, territories, concepts, heuristicIssues)),
     fixture: { issues: [] },
+    reasoningEffort: "medium",
   });
 
   const repairTargets = mergeRepairTargets(concepts, heuristicIssues, modelReview.issues).slice(0, 6);
@@ -157,6 +161,7 @@ async function generateTerritoryConcepts(
         ? fixtureConcepts
         : demoConcepts.slice(0, 5).map((concept) => ({ ...concept, territoryId: territory.id })),
     },
+    reasoningEffort: "low",
   });
 
   return {
@@ -187,6 +192,7 @@ async function repairConcept(
     instructions: CONCEPT_REPAIR_INSTRUCTIONS,
     prompt: `CAMPAIGN CONTEXT\n${JSON.stringify(createRepairCampaignContext(bible))}\n\nTERRITORY\n${JSON.stringify(territory)}\n\nREQUIRED EXECUTION TYPE\n${concept.executionType}\n\nREPAIR REQUEST\n${instruction}\n\nRELEVANT PEERS TO AVOID DUPLICATING\n${JSON.stringify(selectRepairPeers(concept, allConcepts))}\n\nReplace only this concept slot. Keep the exact concept id ${concept.id} and territory id ${concept.territoryId}.`,
     fixture: { concept: fixtureOverride ?? concept },
+    reasoningEffort: "low",
   });
 
   return {
