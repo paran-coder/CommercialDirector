@@ -1,57 +1,55 @@
-# Commercial Director v1.1.0 — User Manual Plan
+# Commercial Director v1.1.0 — User Manual
 
-> This describes the intended v1.1.0 Asset Bible workflow. The released main branch remains v1.0.2 until implementation and CI are complete.
+## 1. Build the campaign
+Start from one product image, review Product Intelligence and Identity Locks, complete the Creative Brief, then build the Campaign Bible and 20 concepts.
 
-## Existing workflow
-Users first:
-1. upload and analyze the product,
-2. complete the Creative Brief,
-3. build the Campaign Bible and 20 concepts,
-4. shortlist the directions worth developing.
+## 2. Shortlist production directions
+Open **Concepts** and shortlist between **1 and 5 concepts**.
 
-## New v1.1.0 step — Build Asset Bible
-After shortlisting between **1 and 5 concepts**, open **Assets** in project navigation.
+Asset Bible intentionally uses only selected concepts. If none are selected, Assets asks you to return to Concepts. If more than five are selected, narrow the production set first.
 
-If no concepts are shortlisted, Commercial Director asks you to return to Concepts and select at least one direction.
+## 3. Open Assets
+Choose **Assets** in the project navigation.
 
-If more than five concepts are shortlisted, narrow the production set before generation. This keeps the Asset Bible specific enough to be useful in production.
+The navigation order is:
+
+`Product → Brief → Campaign → Concepts → Assets`
 
 Choose **Build Asset Bible**.
 
-## Product Sheet
-Product Sheet is the highest-priority continuity reference.
+## 4. Review Product Sheet
+Product Sheet is the primary product-continuity contract.
 
 It records:
-- product identity statement
-- silhouette/form rules
-- visible features that must remain unchanged
-- materials and finish
-- color and marking rules
-- scale and handling cues
+- identity statement
+- features to preserve
+- form rules
+- materials/surface behavior
+- color/marking rules
+- scale and handling
 - preferred hero angles
-- things the production system must not alter
-
-Future scene and rendering stages will use these constraints to protect product identity.
-
-## Hero
-Hero defines the primary human/character presence where relevant.
-
-It records:
-- whether a hero is required, optional, or not needed
-- campaign role
-- casting direction
-- appearance/grooming direction
-- performance/body language
-- relationship to the product
+- prohibited substitutions/distortions
 - continuity locks
-- which shortlisted concepts use the hero
 
-A non-human product category can legitimately use `none`.
+Its stable key is `product-main`.
 
-## Wardrobe
-Wardrobe contains up to four production looks when a Hero is applicable.
+## 5. Review Hero
+Hero records whether a recurring human/character presence is:
+- required
+- optional
+- none
 
-Each look defines:
+It also defines casting, grooming, performance, product relationship, continuity locks, and applicable shortlisted concepts.
+
+Stable key: `hero-primary`.
+
+If Hero is `none`, Wardrobe is empty.
+
+## 6. Review Wardrobe
+Wardrobe contains zero to four reusable looks.
+
+Each look includes:
+- canonical stable key
 - silhouette
 - materials
 - palette
@@ -59,58 +57,42 @@ Each look defines:
 - continuity locks
 - applicable shortlisted concepts
 
-If Hero is `none`, Wardrobe remains empty.
-
-## Locations
+## 7. Review Locations
 The Asset Bible defines three to six reusable environments.
 
-Each location records:
-- environment type
-- architecture/spatial character
-- materials
-- palette
-- preferred lighting window
-- practical lighting/environment cues
-- continuity locks
-- applicable shortlisted concepts
+Each location includes spatial character, materials, palette, lighting window, practical cues, continuity locks, and concept applicability.
 
-## Props
-The Asset Bible defines two to eight canonical props.
+## 8. Review Props
+The Asset Bible defines two to eight canonical production props.
 
-Each prop records:
-- its role
-- material/finish
-- palette
-- handling/use
-- placement/staging
-- continuity locks
-- applicable shortlisted concepts
+Each prop includes its production role, material/finish, palette, handling, staging, continuity locks, and applicable shortlisted concepts.
 
-## Global Continuity
-Global Continuity captures campaign-wide rules and conflicts.
+## 9. Review Global Continuity
+Global Continuity separates:
+- campaign-wide rules that should remain consistent,
+- intentional differences/conflicts that should remain distinct,
+- practical production notes.
 
-It distinguishes:
-- details that should remain consistent across all selected concepts,
-- deliberate differences that should remain different,
-- potential conflicts that production should not accidentally blend together.
+## 10. Revisions
+Every generation creates an Asset Bible revision.
 
-## Revisions
-Every generated Asset Bible is a revision.
+The page shows:
+- Asset Bible revision
+- source Campaign revision
+- number of selected concepts
+- Current / Out of date status
 
-The revision remembers:
-- the Campaign Bible revision it came from,
-- exactly which shortlisted concepts it was built for.
+Choose **Regenerate** to append a new revision. Previous revisions are retained.
 
-Regenerating creates a new revision; the previous revision is retained.
+## 11. Out-of-date status
+If the Campaign Bible or shortlist changes after an Asset Bible was generated, the previous Asset Bible is preserved but marked **Out of date**.
 
-If the shortlist or Campaign Bible later changes, Assets shows the current Asset Bible as **out of date** rather than pretending it still matches the project.
+Generate again to create a new revision from the current campaign and shortlist.
 
-## What v1.1.0 still does not generate
-Asset Bible is a production specification layer, not final media.
-
-v1.1.0 does not produce:
+## 12. What v1.1.0 does not do
+Asset Bible is a structured production specification. It does not yet create:
 - product reference renders
-- character images
+- Hero images
 - wardrobe images
 - location images
 - prop images
@@ -118,7 +100,22 @@ v1.1.0 does not produce:
 - shotlists
 - videos
 
-Reference media comes later in v1.3.0. Scenes and shotlists begin in v1.2.0.
+Scenes/shotlists arrive in v1.2.0. Reference asset generation arrives in v1.3.0.
 
-## Developer acceptance
-The implementation is accepted only after PostgreSQL 17 schema push, typecheck, lint, production build, and the complete Playwright suite pass. Asset Bible E2E must verify generation, persistence, revision history, and source-change/out-of-date behavior.
+## Persistence
+With `DATABASE_URL` configured, Asset Bible revisions and generation jobs are stored in PostgreSQL.
+
+Without PostgreSQL, browser fallback preserves the same append-only revision model for local/fixture development.
+
+## Developer verification
+
+```bash
+npm install
+npm run db:push
+npm run typecheck
+npm run lint
+npm run build
+npm run test:e2e
+```
+
+GitHub Actions runs the same gate against PostgreSQL 17.

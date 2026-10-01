@@ -1,110 +1,110 @@
 # Commercial Director v1.1.0 — Implementation Checklist
 
-> Planning branch. Implementation begins only after this v1.1.0 plan is approved.
-
 ## Phase 0 — Plan and contracts
 - [x] Create v1.1.0 feature branch from released main
 - [x] Update context-notes.md
 - [x] Update checklist.md
 - [x] Update README.md
 - [x] Update User manual.md
-- [ ] Approve v1.1.0 implementation plan
+- [x] Approve v1.1.0 implementation plan
 
 ## Phase 1 — Asset Bible domain
-- [ ] Add Asset Bible Zod schemas
-- [ ] Add Product Sheet contract
-- [ ] Add Hero contract with required / optional / none applicability
-- [ ] Add Wardrobe contract
-- [ ] Add Location contract
-- [ ] Add Prop contract
-- [ ] Add global continuity/conflict contract
-- [ ] Add deterministic canonical asset-key normalization
-- [ ] Add deterministic structural validator
+- [x] Add Asset Bible Zod schemas
+- [x] Add Product Sheet contract
+- [x] Add Hero required / optional / none contract
+- [x] Add Wardrobe contract
+- [x] Add Location contract
+- [x] Add Prop contract
+- [x] Add Global Continuity contract
+- [x] Add deterministic canonical asset-key normalization
+- [x] Add deterministic structural validator
 
 ## Phase 2 — AI orchestration
-- [ ] Add Product Continuity Director prompt/schema
-- [ ] Add Casting & Styling Director prompt/schema
-- [ ] Add Production Designer prompt/schema
-- [ ] Run independent asset generation tasks in parallel
-- [ ] Build compact shared source context
-- [ ] Add compact cross-asset Quality Review
-- [ ] Add bounded targeted section repair
-- [ ] Reuse model-call retry utility
-- [ ] Assign reasoning-effort hints by task
-- [ ] Add deterministic fixture Asset Bible
+- [x] Add Product Continuity Director
+- [x] Add Casting & Styling Director
+- [x] Add Production Designer
+- [x] Run independent asset generation tasks in parallel
+- [x] Build compact shared source context
+- [x] Add compact cross-asset Quality Review
+- [x] Add bounded targeted section repair
+- [x] Feed deterministic structural issues into repair path
+- [x] Reuse model-call retry utility
+- [x] Assign reasoning-effort hints by task
+- [x] Add deterministic fixture Asset Bible
 
 ## Phase 3 — Persistence
-- [ ] Add asset_bible generation kind
-- [ ] Add asset_bible_revisions PostgreSQL table
-- [ ] Store source campaign revision
-- [ ] Store source shortlisted concept stable keys
-- [ ] Add Asset Bible to ProjectSnapshot
-- [ ] Add Asset Bible revisions to ProjectSnapshot
-- [ ] Add append-only browser fallback revision semantics
-- [ ] Add repository saveAssetBible contract
-- [ ] Implement PostgreSQL save/hydration
-- [ ] Keep persistence commit outside AI retry boundary
+- [x] Add asset_bible generation kind
+- [x] Add asset_bible_revisions PostgreSQL table
+- [x] Store source Campaign revision
+- [x] Store source shortlisted concept stable keys
+- [x] Add Asset Bible to ProjectSnapshot
+- [x] Add Asset Bible revisions to ProjectSnapshot
+- [x] Add append-only browser fallback revision semantics
+- [x] Add repository saveAssetBible contract
+- [x] Implement PostgreSQL save/hydration
+- [x] Keep persistence commit outside AI retry boundary
+- [x] Recheck Campaign/shortlist source before commit
 
 ## Phase 4 — API
-- [ ] Add Asset Bible generation endpoint
-- [ ] Validate project/campaign prerequisites
-- [ ] Require 1–5 shortlisted concepts
-- [ ] Persist successful result transactionally
-- [ ] Track pending/running/succeeded/failed generation job
-- [ ] Return actionable invalid-shortlist / stale-source errors
+- [x] Add Asset Bible generation endpoint
+- [x] Validate project/campaign prerequisites
+- [x] Require 1–5 shortlisted concepts
+- [x] Persist successful result
+- [x] Track generation job state
+- [x] Reject source drift before persistence
 
 ## Phase 5 — UI
-- [ ] Add Assets to project navigation
-- [ ] Add /projects/[projectId]/assets route
-- [ ] Add no-campaign empty state
-- [ ] Add no-shortlist empty state
-- [ ] Add >5 shortlist narrowing state
-- [ ] Add Build Asset Bible action
-- [ ] Add Product Sheet section
-- [ ] Add Hero section
-- [ ] Add Wardrobe section
-- [ ] Add Locations section
-- [ ] Add Props section
-- [ ] Add Global Continuity section
-- [ ] Show stable asset keys
-- [ ] Show concept applicability
-- [ ] Show current / out-of-date source status
-- [ ] Add Regenerate action
-- [ ] Show revision number/history summary
-- [ ] Preserve restrained professional UI language and reduced-motion behavior
+- [x] Add Assets to project navigation
+- [x] Add /projects/[projectId]/assets route
+- [x] Add no-campaign state
+- [x] Add no-shortlist state
+- [x] Add >5 shortlist narrowing state
+- [x] Add Build Asset Bible action
+- [x] Add Product Sheet
+- [x] Add Hero
+- [x] Add Wardrobe
+- [x] Add Locations
+- [x] Add Props
+- [x] Add Global Continuity
+- [x] Show stable asset keys
+- [x] Show concept applicability
+- [x] Show current / out-of-date status
+- [x] Add Regenerate
+- [x] Show revision/source summary
+- [x] Preserve restrained professional UI
 
 ## Phase 6 — Deterministic tests
-- [ ] Verify Product Sheet exactly one
-- [ ] Verify Hero applicability contract
-- [ ] Verify Wardrobe 0–4
-- [ ] Verify Locations 3–6
-- [ ] Verify Props 2–8
-- [ ] Verify canonical stable keys
-- [ ] Verify unique asset keys
-- [ ] Verify asset concept refs belong to shortlist
-- [ ] Verify Hero-none forbids Wardrobe entries
-- [ ] Verify malformed model output retries at call boundary
-- [ ] Verify persistence failure does not rerun generation
-- [ ] Verify second generation creates revision 2
+- [x] Product Sheet exactly one
+- [x] Hero applicability contract
+- [x] Hero-none produces no wardrobe
+- [x] Wardrobe 0–4
+- [x] Locations 3–6
+- [x] Props 2–8
+- [x] Canonical stable keys
+- [x] Unique asset keys
+- [x] Asset concept refs belong to shortlist
+- [x] Invalid shortlist rejection
+- [x] Persistence failure does not rerun successful Asset Bible generation
 
 ## Phase 7 — DB-backed E2E
-- [ ] Campaign → shortlist → Assets flow
-- [ ] Generate Asset Bible
-- [ ] Verify all five asset sections
-- [ ] Reload and hydrate Asset Bible from PostgreSQL
-- [ ] Verify asset_bible generation job success
-- [ ] Regenerate and verify revision history
-- [ ] Change shortlist and verify out-of-date state
+- [x] Campaign → shortlist → Assets flow
+- [x] Generate Asset Bible
+- [x] Verify all production sections
+- [x] Reload and hydrate from PostgreSQL
+- [x] Verify asset_bible generation job success
+- [x] Regenerate and verify revision 2
+- [x] Change shortlist and verify Out of date state
 
 ## Release gate
-- [ ] PostgreSQL 17 db:push
-- [ ] TypeScript typecheck
-- [ ] ESLint
-- [ ] Next.js production build
-- [ ] Playwright full suite
-- [ ] Self-review score
+- [x] PostgreSQL 17 db:push
+- [x] TypeScript typecheck
+- [x] ESLint
+- [x] Next.js production build
+- [x] Playwright full suite on feature implementation
+- [x] Self-review completed
+- [ ] Final release-preparation commit CI
 - [ ] Open PR to main
-- [ ] Squash merge only after green CI
+- [ ] Squash merge only after final green CI
 - [ ] Re-sync dev/main baseline after merge
 
 ## Explicitly deferred
@@ -112,3 +112,4 @@
 - [ ] Scene graph — v1.2.0
 - [ ] Shotlist/prompt compiler — v1.2.0
 - [ ] Video generation — v2.0.0
+- [ ] Live-provider smoke test with external API credentials

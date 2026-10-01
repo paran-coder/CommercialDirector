@@ -1,19 +1,18 @@
-# Commercial Director v1.1.0 — Asset Bible planning
+# Commercial Director v1.1.0
 
-> `main` currently represents the released Commercial-Director-v1.0.2 baseline. This feature branch defines the v1.1.0 implementation before code changes begin.
+Commercial Director is a creative decision system that turns one product image into a campaign foundation, 20 structured advertising concepts, and a reusable production Asset Bible for selected directions.
 
-Commercial Director is a creative decision system that turns one product image into a campaign foundation, 20 structured advertising directions, and—starting in v1.1.0—a reusable production Asset Bible for selected directions.
+## Product flow
 
-## Planned v1.1.0 flow
+`Product Image → Product Intelligence → Identity Locks → Creative Brief → Campaign Bible → 4 Territories → 20 Concepts → Shortlist 1–5 → Asset Bible`
 
-`Product → Brief → Campaign Bible → 20 Concepts → Shortlist 1–5 → Asset Bible`
+v1.1.0 still ends before final image/video rendering. It adds the production-specification layer required by later scenes, shotlists, prompt compilation, continuity checks, and media generation.
 
-The Asset Bible deliberately comes after shortlist. Production detail should be created for directions the user has chosen, not for all 20 concepts.
+## Asset Bible
 
-## Asset Bible scope
+Asset Bible is generated only after the user shortlists between one and five concepts.
 
-v1.1.0 adds structured production specifications for:
-
+It contains:
 - Product Sheet
 - Hero
 - Wardrobe
@@ -21,93 +20,147 @@ v1.1.0 adds structured production specifications for:
 - Props
 - Global Continuity
 
-This release does **not** generate final images or video.
+The page is a production document rather than an image gallery.
 
-## Source of truth
+## Stable asset identity
 
-An Asset Bible revision is bound to:
-- one Campaign Bible revision,
-- a snapshot of 1–5 shortlisted concept stable keys.
+Application code assigns canonical stable keys rather than trusting model-generated names:
 
-If either source changes, the current Asset Bible is marked out of date. Regeneration creates a new revision rather than overwriting prior output.
-
-## Stable asset keys
-
-Stable asset identity is assigned by application code, not trusted to free-form model naming.
-
-Examples:
 - `product-main`
 - `hero-primary`
-- `wardrobe-01`
-- `location-01`
-- `prop-01`
+- `wardrobe-01`, `wardrobe-02`, ...
+- `location-01`, `location-02`, ...
+- `prop-01`, `prop-02`, ...
 
-These keys become the contract that v1.2.0 scenes and shotlists can reference.
+These keys are the downstream contract for v1.2.0 scenes and shotlists.
 
-## Planned AI pipeline
+## AI pipeline
 
-Three role-specific structured generation jobs run from one compact source context:
+Three structured generation tasks run in parallel from a compact shared source context:
 
 1. Product Continuity Director → Product Sheet
 2. Casting & Styling Director → Hero + Wardrobe
 3. Production Designer → Locations + Props
 
-Independent calls run in parallel. Application code then canonicalizes stable keys and performs deterministic structural checks. A compact cross-asset review checks continuity and contradictions; only affected sections may be repaired.
+The engine then:
+1. runs a compact cross-asset continuity review,
+2. normalizes canonical asset keys,
+3. validates counts, shortlist references, Hero/Wardrobe compatibility, key uniqueness, and continuity constraints,
+4. repairs only affected section groups,
+5. validates the final Asset Bible before returning it.
 
 Existing v1.0.2 guarantees remain:
 - provider abstraction
 - Zod structured output
-- bounded per-call retry
-- reasoning-effort hints
-- no duplicate AI work after persistence failure
+- bounded model-call retry
+- task-level reasoning effort hints
+- persistence failures do not rerun successful AI work
 
-## Planned persistence
+## Persistence and revisions
 
-PostgreSQL gains `asset_bible_revisions` with:
+PostgreSQL is the source of truth when `DATABASE_URL` is configured.
+
+v1.1.0 adds `asset_bible_revisions`, storing:
 - project
-- revision
-- source campaign revision
-- source concept-key snapshot
-- full structured Asset Bible data
+- revision number
+- source Campaign Bible revision
+- source shortlisted concept stable keys
+- complete structured Asset Bible
 - creation time
 
-The project runtime snapshot gains latest Asset Bible plus revision history. Browser fallback mirrors the append-only behavior.
+Regeneration appends a new revision; earlier revisions are never silently overwritten.
 
-Generation tracking gains `asset_bible`.
+Before persistence commit, the API rechecks the current Campaign Bible revision and shortlist. If either changed during generation, the result is not committed and the user is asked to generate again from the current source.
 
-## Planned UI
+Without PostgreSQL, the browser fallback mirrors append-only Asset Bible revisions.
+
+## Stale-source behavior
+
+The latest Asset Bible is considered current only when:
+- its source Campaign Bible revision equals the latest Campaign Bible revision, and
+- its source concept-key set equals the current shortlist.
+
+If either changes, Assets shows **Out of date** while preserving the previous revision.
+
+## UI
 
 New route:
 
 `/projects/[projectId]/assets`
 
-Navigation order:
+Project navigation:
 
 `Product → Brief → Campaign → Concepts → Assets`
 
-The page is an editorial production document, not an image gallery. It shows source/revision status followed by Product Sheet, Hero, Wardrobe, Locations, Props, and Global Continuity.
+Prerequisite states:
+- no campaign → return to Brief/Campaign
+- no shortlist → shortlist at least one concept
+- more than five shortlisted concepts → narrow the production set
 
-Prerequisites:
-- campaign exists,
-- 1–5 concepts are shortlisted.
+## Architecture
+
+- Next.js 16 App Router + TypeScript + React 19
+- Tailwind CSS
+- PostgreSQL 17 + Drizzle ORM
+- Zod domain contracts
+- Provider-agnostic AI orchestration
+- Deterministic fixture provider
+- OpenAI Responses adapter
+- PostgreSQL runtime repository
+- localStorage DB-free fallback
+- IndexedDB source-image Blob storage
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+For PostgreSQL:
+
+```bash
+DATABASE_URL=postgresql://...
+npm run db:push
+```
 
 ## Quality gate
 
-v1.1.0 is not merged to main until all of the following pass against PostgreSQL 17:
-
 ```bash
-npm run db:push
 npm run typecheck
 npm run lint
 npm run build
 npm run test:e2e
 ```
 
-E2E must cover Asset Bible generation, DB hydration, generation-job state, revision append behavior, and out-of-date detection after shortlist changes.
+GitHub Actions provisions PostgreSQL 17, applies the Drizzle schema, and runs the full gate.
 
-## Current status
+v1.1.0 coverage includes:
+- canonical Asset Bible keys and counts
+- Hero-none / Wardrobe-empty behavior
+- shortlist-reference validation
+- Asset Bible persistence-failure retry boundary
+- DB-backed campaign → shortlist → Asset Bible flow
+- PostgreSQL hydration after reload
+- Asset Bible generation-job success
+- regeneration creating revision 2
+- stale detection after shortlist change
 
-Planning complete; implementation awaiting approval.
+## Current boundary
 
-Current release: Commercial-Director-v1.0.2  
-Feature target: Commercial-Director-v1.1.0
+Not included in v1.1.0:
+- asset reference-image generation
+- scenes
+- shotlists
+- provider-specific image/video prompting
+- video generation
+- final assembly
+
+Next milestones:
+- v1.2.0: Treatments, scenes, shotlist, prompt compiler
+- v1.3.0: Asset reference generation and Continuity Director
+- v2.0.0: Video generation, assembly, packshot, cutdowns
+
+## Version
+
+Commercial-Director-v1.1.0
