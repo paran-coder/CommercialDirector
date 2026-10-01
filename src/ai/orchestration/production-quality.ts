@@ -153,6 +153,11 @@ export function validateProductionPlan(plan: ProductionPlan, assetBible: AssetBi
 
       const sceneKeys = new Set(variant.scenes.map((scene) => scene.stableKey));
       const shotsByScene = new Map<string, number>();
+      const shotDurationByScene = new Map<string, number>();
+      const sceneDurationTotal = variant.scenes.reduce((sum, scene) => sum + scene.duration, 0);
+      if (Math.abs(sceneDurationTotal - variant.duration) > 0.75) {
+        issues.push(issue(concept.conceptKey, variant.duration, "scenes", "timing", `Scene durations total ${sceneDurationTotal.toFixed(2)}s instead of approximately ${variant.duration}s.`));
+      }
       let previousEnd = 0;
 
       for (const scene of variant.scenes) {
@@ -161,6 +166,7 @@ export function validateProductionPlan(plan: ProductionPlan, assetBible: AssetBi
 
       for (const shot of variant.shots) {
         shotsByScene.set(shot.sceneKey, (shotsByScene.get(shot.sceneKey) ?? 0) + 1);
+        shotDurationByScene.set(shot.sceneKey, (shotDurationByScene.get(shot.sceneKey) ?? 0) + shot.duration);
         if (!sceneKeys.has(shot.sceneKey)) {
           issues.push(issue(concept.conceptKey, variant.duration, "shots", "scene_ref", `${shot.stableKey} references unknown scene ${shot.sceneKey}.`));
         }
@@ -174,6 +180,11 @@ export function validateProductionPlan(plan: ProductionPlan, assetBible: AssetBi
       for (const scene of variant.scenes) {
         if (!shotsByScene.get(scene.stableKey)) {
           issues.push(issue(concept.conceptKey, variant.duration, "shots", "missing_shots", `${scene.stableKey} has no shots.`));
+          continue;
+        }
+        const shotDuration = shotDurationByScene.get(scene.stableKey) ?? 0;
+        if (Math.abs(shotDuration - scene.duration) > 0.5) {
+          issues.push(issue(concept.conceptKey, variant.duration, "shots", "timing", `Shots for ${scene.stableKey} total ${shotDuration.toFixed(2)}s while the scene is ${scene.duration.toFixed(2)}s.`));
         }
       }
 
@@ -211,12 +222,18 @@ function validateTreatment(
 ) {
   const beats = [...treatment.beats].sort((a, b) => a.start - b.start);
   let cursor = 0;
+  if (Math.abs((beats[0]?.start ?? -1) - 0) > 0.001) {
+    issues.push(issue(conceptKey, duration, "treatment", "timing", `${treatment.stableKey} must start at 0s.`));
+  }
   for (const beat of beats) {
     if (beat.end <= beat.start || beat.start < cursor - 0.001 || beat.end > duration + 0.001) {
       issues.push(issue(conceptKey, duration, "treatment", "timing", `${treatment.stableKey} contains invalid beat timing.`));
       return;
     }
     cursor = beat.end;
+  }
+  if (Math.abs(cursor - duration) > 0.5) {
+    issues.push(issue(conceptKey, duration, "treatment", "timing", `${treatment.stableKey} ends at ${cursor.toFixed(2)}s instead of approximately ${duration}s.`));
   }
 }
 
