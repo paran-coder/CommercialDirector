@@ -122,7 +122,7 @@ function createShots(scenes: SceneDraft[]): ShotDraft[] {
         framing: scene.slot === 1 ? "Controlled medium-wide establishing frame" : "Purposeful medium or close product-led frame",
         cameraMovement: "Slow, motivated push or lateral drift with no arbitrary handheld motion",
         lensIntent: "Natural cinematic perspective with controlled compression",
-        subjectAction: `${scene.action} Begin the scene action clearly and preserve spatial orientation.`,
+        subjectAction: compactText(`${scene.action} Begin the scene action clearly and preserve spatial orientation.`, 320),
         productVisibility: "Product remains recognizable and materially consistent with product-main.",
         lightingIntent: "Preserve the Asset Bible lighting logic and product surface response.",
         assetRefs: scene.assetRefs,
@@ -136,7 +136,7 @@ function createShots(scenes: SceneDraft[]): ShotDraft[] {
         framing: scene.slot === 3 ? "Resolved product-forward close or hero frame" : "Tighter detail or reaction frame",
         cameraMovement: "Controlled continuation of the established camera language",
         lensIntent: "Slightly tighter optical emphasis without distorting product geometry",
-        subjectAction: `${scene.action} Complete the scene action and hand off the intended continuity state.`,
+        subjectAction: compactText(`${scene.action} Complete the scene action and hand off the intended continuity state.`, 320),
         productVisibility: "Product identity and label/silhouette relationship remain intact.",
         lightingIntent: "Match the established direction, contrast, practicals, and material response.",
         assetRefs: scene.assetRefs,
@@ -166,4 +166,10 @@ function assetRefsForConcept(concept: Concept, assetBible: AssetBible) {
 
 function round(value: number) {
   return Math.round(value * 100) / 100;
+}
+
+
+function compactText(value: string, max: number) {
+  if (value.length <= max) return value;
+  return `${value.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
 }
