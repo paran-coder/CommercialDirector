@@ -1,111 +1,105 @@
-# Commercial Director v1.1.0 — User Manual
+# Commercial Director v1.2.0 — User Manual (Implementation Plan)
 
-## 1. Build the campaign
-Start from one product image, review Product Intelligence and Identity Locks, complete the Creative Brief, then build the Campaign Bible and 20 concepts.
+## 1. Complete Assets first
+Production Planning requires a **current** Asset Bible.
 
-## 2. Shortlist production directions
-Open **Concepts** and shortlist between **1 and 5 concepts**.
+Before opening Production:
+1. build the Campaign Bible and 20 concepts,
+2. shortlist 1–5 concepts,
+3. build the Asset Bible,
+4. ensure Assets shows **Current**.
 
-Asset Bible intentionally uses only selected concepts. If none are selected, Assets asks you to return to Concepts. If more than five are selected, narrow the production set first.
+If the Campaign Bible or shortlist changes, regenerate the Asset Bible before generating a new Production Plan.
 
-## 3. Open Assets
-Choose **Assets** in the project navigation.
+## 2. Open Production
+Choose **Production** in the project navigation.
 
-The navigation order is:
+The intended navigation becomes:
 
-`Product → Brief → Campaign → Concepts → Assets`
+`Product → Brief → Campaign → Concepts → Assets → Production`
 
-Choose **Build Asset Bible**.
+## 3. Generate the Production Plan
+Choose **Build Production Plan**.
 
-## 4. Review Product Sheet
-Product Sheet is the primary product-continuity contract.
+Commercial Director generates production planning only for shortlisted concepts.
 
-It records:
-- identity statement
-- features to preserve
-- form rules
-- materials/surface behavior
-- color/marking rules
-- scale and handling
-- preferred hero angles
-- prohibited substitutions/distortions
-- continuity locks
+## 4. Choose a concept
+Use the concept selector to switch between shortlisted concepts.
 
-Its stable key is `product-main`.
+Each concept keeps its own treatments, scenes, shots, and compiled prompt bundles inside the same Production Plan revision.
 
-## 5. Review Hero
-Hero records whether a recurring human/character presence is:
-- required
-- optional
-- none
+## 5. Choose 15s, 30s, or 45s
+The duration selector changes pacing while preserving the same core concept.
 
-It also defines casting, grooming, performance, product relationship, continuity locks, and applicable shortlisted concepts.
+- **15s** — compressed mechanism and payoff
+- **30s** — full setup/action/payoff
+- **45s** — more atmosphere, performance, product detail, or reaction time
 
-Stable key: `hero-primary`.
+## 6. Review Scene Graph
+Each Scene shows:
+- canonical scene key
+- duration target
+- story purpose
+- action
+- product role
+- Asset Bible references
+- continuity in/out state
+- audio/sound intent
 
-If Hero is `none`, Wardrobe is empty.
+Scenes reference canonical Asset Bible keys rather than free-text recreations.
 
-## 6. Review Wardrobe
-Wardrobe contains zero to four reusable looks.
+## 7. Review Shotlist
+Expand a Scene to inspect its shots.
 
-Each look includes:
-- canonical stable key
-- silhouette
-- materials
-- palette
-- styling notes
-- continuity locks
-- applicable shortlisted concepts
+Each Shot includes:
+- canonical shot key
+- timing
+- framing
+- camera movement
+- lens/optical intent
+- subject/action
+- product visibility
+- lighting
+- asset references
+- continuity notes
+- transition intent
 
-## 7. Review Locations
-The Asset Bible defines three to six reusable environments.
+## 8. Inspect prompts in Pro Controls
+Prompt details are hidden behind Pro Controls by default.
 
-Each location includes spatial character, materials, palette, lighting window, practical cues, continuity locks, and concept applicability.
+Prompt IR is the model-neutral source of truth. Provider views compile that same structure for:
+- Generic cinematic
+- Seedance
+- Kling
+- Veo
 
-## 8. Review Props
-The Asset Bible defines two to eight canonical production props.
+Provider compilers may change syntax but should not change the creative facts.
 
-Each prop includes its production role, material/finish, palette, handling, staging, continuity locks, and applicable shortlisted concepts.
+## 9. Revisions
+Regeneration creates a new append-only Production Plan revision.
 
-## 9. Review Global Continuity
-Global Continuity separates:
-- campaign-wide rules that should remain consistent,
-- intentional differences/conflicts that should remain distinct,
-- practical production notes.
-
-## 10. Revisions
-Every generation creates an Asset Bible revision.
-
-The page shows:
-- Asset Bible revision
+The page will show:
+- Production Plan revision
 - source Campaign revision
-- number of selected concepts
-- Current / Out of date status
+- source Asset Bible revision
+- selected concept count
+- Current / Out of date state
 
-Choose **Regenerate** to append a new revision. Previous revisions are retained.
+## 10. Out-of-date behavior
+A Production Plan becomes out of date when its bound Campaign, Asset Bible, or shortlist changes.
 
-## 11. Out-of-date status
-If the Campaign Bible or shortlist changes after an Asset Bible was generated, the previous Asset Bible is preserved but marked **Out of date**.
+The previous revision remains available as historical production planning, but a new revision should be generated from the current source.
 
-Generate again to create a new revision from the current campaign and shortlist.
+## 11. What v1.2.0 does not do
+This version does not render:
+- images
+- reference frames
+- video clips
+- final edits
 
-## 12. What v1.1.0 does not do
-Asset Bible is a structured production specification. It does not yet create:
-- product reference renders
-- Hero images
-- wardrobe images
-- location images
-- prop images
-- scenes
-- shotlists
-- videos
+It produces structured production plans and provider-ready text prompt bundles only.
 
-Scenes/shotlists arrive in v1.2.0. Reference asset generation arrives in v1.3.0.
-
-## Persistence
-With `DATABASE_URL` configured, Asset Bible revisions and generation jobs are stored in PostgreSQL.
-
-Without PostgreSQL, browser fallback preserves the same append-only revision model for local/fixture development.
+Reference asset generation is planned for v1.3.0. Actual media generation and assembly are planned for v2.0.0.
 
 ## Developer verification
 
@@ -117,5 +111,3 @@ npm run lint
 npm run build
 npm run test:e2e
 ```
-
-GitHub Actions runs the same gate against PostgreSQL 17.
