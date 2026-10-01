@@ -10,9 +10,9 @@ export function getImageArtifactStore(): ImageArtifactStore {
   }
 
   if (store === "vercel_blob") {
-    if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.VERCEL_OIDC_TOKEN) {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
       throw new Error(
-        "BLOB_READ_WRITE_TOKEN or VERCEL_OIDC_TOKEN is required when IMAGE_ARTIFACT_STORE=vercel_blob.",
+        "BLOB_READ_WRITE_TOKEN is required when IMAGE_ARTIFACT_STORE=vercel_blob.",
       );
     }
     return new VercelBlobImageArtifactStore();
