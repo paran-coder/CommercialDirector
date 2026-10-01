@@ -1,115 +1,97 @@
-# Commercial Director v1.1.0 — Implementation Checklist
+# Commercial Director v1.2.0 — Implementation Checklist
 
 ## Phase 0 — Plan and contracts
-- [x] Create v1.1.0 feature branch from released main
+- [x] Create v1.2.0 feature branch from released main
 - [x] Update context-notes.md
 - [x] Update checklist.md
 - [x] Update README.md
 - [x] Update User manual.md
-- [x] Approve v1.1.0 implementation plan
+- [x] Approve v1.2.0 implementation plan
 
-## Phase 1 — Asset Bible domain
-- [x] Add Asset Bible Zod schemas
-- [x] Add Product Sheet contract
-- [x] Add Hero required / optional / none contract
-- [x] Add Wardrobe contract
-- [x] Add Location contract
-- [x] Add Prop contract
-- [x] Add Global Continuity contract
-- [x] Add deterministic canonical asset-key normalization
+## Phase 1 — Production domain
+- [x] Add Treatment schemas for 15/30/45 seconds
+- [x] Add Scene Graph schema
+- [x] Add Shot schema
+- [x] Add Prompt IR schema
+- [x] Add compiled prompt bundle schema
+- [x] Add Production Plan schema
+- [x] Add application-assigned canonical scene/shot keys
 - [x] Add deterministic structural validator
+- [x] Add source-binding/stale helper
 
 ## Phase 2 — AI orchestration
-- [x] Add Product Continuity Director
-- [x] Add Casting & Styling Director
-- [x] Add Production Designer
-- [x] Run independent asset generation tasks in parallel
-- [x] Build compact shared source context
-- [x] Add compact cross-asset Quality Review
-- [x] Add bounded targeted section repair
-- [x] Feed deterministic structural issues into repair path
-- [x] Reuse model-call retry utility
-- [x] Assign reasoning-effort hints by task
-- [x] Add deterministic fixture Asset Bible
+- [x] Add Treatment Director prompt
+- [x] Add Scene Director prompt
+- [x] Add Shot Director prompt
+- [x] Add Production Continuity Reviewer
+- [x] Generate shortlisted concepts independently
+- [x] Keep scene/shot dependency ordered within each concept
+- [x] Add bounded targeted repair
+- [x] Reuse model-call retry boundary
+- [x] Add deterministic production fixture
 
-## Phase 3 — Persistence
-- [x] Add asset_bible generation kind
-- [x] Add asset_bible_revisions PostgreSQL table
-- [x] Store source Campaign revision
-- [x] Store source shortlisted concept stable keys
-- [x] Add Asset Bible to ProjectSnapshot
-- [x] Add Asset Bible revisions to ProjectSnapshot
-- [x] Add append-only browser fallback revision semantics
-- [x] Add repository saveAssetBible contract
-- [x] Implement PostgreSQL save/hydration
-- [x] Keep persistence commit outside AI retry boundary
-- [x] Recheck Campaign/shortlist source before commit
+## Phase 3 — Prompt compiler
+- [x] Build model-neutral Prompt IR from validated shots
+- [x] Add generic cinematic compiler
+- [x] Add Seedance compiler
+- [x] Add Kling compiler
+- [x] Add Veo compiler
+- [x] Verify compiler never invents new asset/creative facts
+- [x] Add compiler contract tests
 
-## Phase 4 — API
-- [x] Add Asset Bible generation endpoint
-- [x] Validate project/campaign prerequisites
-- [x] Require 1–5 shortlisted concepts
-- [x] Persist successful result
-- [x] Track generation job state
+## Phase 4 — Persistence/API
+- [x] Add production_plan generation kind
+- [x] Add production_plan_revisions table
+- [x] Bind Campaign revision
+- [x] Bind Asset Bible revision
+- [x] Bind shortlisted concept keys
+- [x] Add ProjectSnapshot production plan/revisions
+- [x] Add browser fallback revision semantics
+- [x] Add repository saveProductionPlan
+- [x] Add production generation API
 - [x] Reject source drift before persistence
 
-## Phase 5 — UI
-- [x] Add Assets to project navigation
-- [x] Add /projects/[projectId]/assets route
-- [x] Add no-campaign state
-- [x] Add no-shortlist state
-- [x] Add >5 shortlist narrowing state
-- [x] Add Build Asset Bible action
-- [x] Add Product Sheet
-- [x] Add Hero
-- [x] Add Wardrobe
-- [x] Add Locations
-- [x] Add Props
-- [x] Add Global Continuity
-- [x] Show stable asset keys
-- [x] Show concept applicability
-- [x] Show current / out-of-date status
-- [x] Add Regenerate
-- [x] Show revision/source summary
-- [x] Preserve restrained professional UI
+## Phase 5 — Production UI
+- [x] Add Production to navigation
+- [x] Add /projects/[projectId]/production route
+- [x] Add missing/stale Asset Bible prerequisite state
+- [x] Add selected-concept switcher
+- [x] Add 15/30/45 treatment switcher
+- [x] Add Scene Graph view
+- [x] Add expandable Shotlist
+- [x] Add Pro Controls for Prompt IR / provider prompts
+- [x] Add Current / Out of date status
+- [x] Add regeneration
+- [x] Preserve restrained production-tool visual language
 
-## Phase 6 — Deterministic tests
-- [x] Product Sheet exactly one
-- [x] Hero applicability contract
-- [x] Hero-none produces no wardrobe
-- [x] Wardrobe 0–4
-- [x] Locations 3–6
-- [x] Props 2–8
-- [x] Canonical stable keys
-- [x] Unique asset keys
-- [x] Asset concept refs belong to shortlist
-- [x] Invalid shortlist rejection
-- [x] Persistence failure does not rerun successful Asset Bible generation
-
-## Phase 7 — DB-backed E2E
-- [x] Campaign → shortlist → Assets flow
-- [x] Generate Asset Bible
-- [x] Verify all production sections
-- [x] Reload and hydrate from PostgreSQL
-- [x] Verify asset_bible generation job success
-- [x] Regenerate and verify revision 2
-- [x] Change shortlist and verify Out of date state
+## Phase 6 — Tests
+- [x] Treatment variants exactly 15/30/45
+- [x] Canonical scene/shot key stability
+- [x] Valid Asset Bible references only
+- [x] Hero-none prohibits Hero/Wardrobe refs
+- [x] Every scene has shots
+- [x] Shot timing is monotonic
+- [x] Shot duration sum matches treatment within tolerance
+- [x] Prompt IR source identity matches shot
+- [x] Provider compiler determinism
+- [x] Persistence failure does not rerun successful AI work
+- [x] DB-backed generation/hydration/revision/stale E2E
 
 ## Release gate
 - [x] PostgreSQL 17 db:push
 - [x] TypeScript typecheck
 - [x] ESLint
 - [x] Next.js production build
-- [x] Playwright full suite on feature implementation
+- [x] Playwright full suite
 - [x] Self-review completed
-- [x] Final release-preparation commit CI
-- [x] Open PR to main (#4)
-- [x] Squash merge only after final green CI
-- [x] Re-sync dev/main baseline after merge
+- [ ] Final release-preparation commit CI
+- [ ] Open PR to main
+- [ ] Squash merge after green CI
+- [ ] Re-sync dev/main baseline
 
 ## Explicitly deferred
-- [ ] Real reference-image rendering — v1.3.0
-- [ ] Scene graph — v1.2.0
-- [ ] Shotlist/prompt compiler — v1.2.0
-- [ ] Video generation — v2.0.0
-- [ ] Live-provider smoke test with external API credentials
+- [ ] Asset reference image rendering — v1.3.0
+- [ ] Generated-media continuity inspection — v1.3.0
+- [ ] Image/video generation — v2.0.0
+- [ ] Timeline assembly — v2.0.0
+- [ ] Live-provider smoke test with external credentials

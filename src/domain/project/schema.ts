@@ -4,6 +4,7 @@ import { campaignBibleSchema, territorySchema } from "@/domain/campaign/schema";
 import { conceptSchema } from "@/domain/concept/schema";
 import { productIntelligenceSchema } from "@/domain/product/schema";
 import { assetBibleSchema } from "@/domain/assets/schema";
+import { productionPlanSchema } from "@/domain/production/schema";
 
 export const campaignRevisionSchema = z.object({
   revision: z.number().int().positive(),
@@ -29,6 +30,16 @@ export const assetBibleRevisionSchema = z.object({
   createdAt: z.string().min(1),
 });
 
+export const productionPlanRevisionSchema = z.object({
+  revision: z.number().int().positive(),
+  sourceCampaignRevision: z.number().int().positive(),
+  sourceAssetBibleRevision: z.number().int().positive(),
+  sourceConceptKeys: z.array(z.string().min(1)).min(1).max(5),
+  sourceConceptRevisions: z.record(z.string(), z.number().int().positive()),
+  data: productionPlanSchema,
+  createdAt: z.string().min(1),
+});
+
 export const localProjectSnapshotSchema = z.object({
   version: z.literal(1),
   id: z.string().min(1),
@@ -46,6 +57,8 @@ export const localProjectSnapshotSchema = z.object({
   conceptRevisions: z.array(conceptRevisionSchema).default([]),
   assetBible: assetBibleSchema.optional(),
   assetBibleRevisions: z.array(assetBibleRevisionSchema).default([]),
+  productionPlan: productionPlanSchema.optional(),
+  productionPlanRevisions: z.array(productionPlanRevisionSchema).default([]),
 });
 
 export const projectRuntimePatchSchema = z.object({
@@ -74,4 +87,31 @@ export function isAssetBibleCurrent(project: ProjectSnapshot) {
   const current = [...new Set(project.shortlist)].sort();
   const source = [...new Set(latest.sourceConceptKeys)].sort();
   return current.length === source.length && current.every((id, index) => id === source[index]);
+}
+
+
+export function getConceptRevisionSnapshot(project: ProjectSnapshot, conceptKeys = project.shortlist) {
+  const snapshot: Record<string, number> = {};
+  for (const key of [...new Set(conceptKeys)]) {
+    const revisions = project.conceptRevisions
+      .filter((item) => item.conceptId === key)
+      .map((item) => item.revision);
+    snapshot[key] = Math.max(1, ...revisions);
+  }
+  return snapshot;
+}
+
+export function isProductionPlanCurrent(project: ProjectSnapshot) {
+  if (!isAssetBibleCurrent(project)) return false;
+  const latest = project.productionPlanRevisions.at(-1);
+  if (!latest || !project.productionPlan) return false;
+  const campaignRevision = project.campaignRevisions.at(-1)?.revision;
+  const assetRevision = project.assetBibleRevisions.at(-1)?.revision;
+  if (campaignRevision !== latest.sourceCampaignRevision) return false;
+  if (assetRevision !== latest.sourceAssetBibleRevision) return false;
+  const current = [...new Set(project.shortlist)].sort();
+  const source = [...new Set(latest.sourceConceptKeys)].sort();
+  if (current.length !== source.length || !current.every((id, index) => id === source[index])) return false;
+  const currentRevisions = getConceptRevisionSnapshot(project, source);
+  return source.every((key) => currentRevisions[key] === latest.sourceConceptRevisions[key]);
 }
