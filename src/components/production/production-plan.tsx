@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, ChevronDown, ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  getConceptRevisionSnapshot,
   isAssetBibleCurrent,
   isProductionPlanCurrent,
   type ProjectSnapshot,
@@ -65,6 +66,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
 
     const sourceCampaignRevision = project.campaignRevisions.at(-1)?.revision;
     const sourceAssetBibleRevision = project.assetBibleRevisions.at(-1)?.revision;
+    const sourceConceptRevisions = getConceptRevisionSnapshot(project, project.shortlist);
     if (!sourceCampaignRevision || !sourceAssetBibleRevision) return;
 
     setError(null);
@@ -83,6 +85,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
           assetBible: project.assetBible,
           sourceCampaignRevision,
           sourceAssetBibleRevision,
+          sourceConceptRevisions,
         }),
       });
       const body = await response.json();
@@ -99,6 +102,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
           body.sourceCampaignRevision,
           body.sourceAssetBibleRevision,
           body.sourceConceptKeys,
+          body.sourceConceptRevisions,
         );
         if (updated) {
           setProject(updated);
@@ -114,6 +118,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
                 sourceCampaignRevision: body.sourceCampaignRevision,
                 sourceAssetBibleRevision: body.sourceAssetBibleRevision,
                 sourceConceptKeys: body.sourceConceptKeys,
+                sourceConceptRevisions: body.sourceConceptRevisions,
                 data: productionPlan,
                 createdAt: new Date().toISOString(),
               },
