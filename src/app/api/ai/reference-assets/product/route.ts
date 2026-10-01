@@ -106,6 +106,18 @@ export async function POST(request: Request) {
         generatedAt: result.generatedAt,
       }),
       commit: async (result) => {
+        const currentProject = await projectRepository.getProject(project.id);
+        const currentAssetBibleRevision = currentProject?.assetBibleRevisions.at(-1)?.revision;
+        if (
+          !currentProject
+          || !isAssetBibleCurrent(currentProject)
+          || currentAssetBibleRevision !== sourceAssetBibleRevision
+        ) {
+          throw new Error(
+            "Reference Asset 생성 중 Campaign, shortlist 또는 Asset Bible이 변경되었습니다. 현재 Asset Bible을 기준으로 다시 생성해 주세요.",
+          );
+        }
+
         await referenceAssetRepository.assertCurrentSource(
           project.id,
           sourceAssetBibleRevision,
