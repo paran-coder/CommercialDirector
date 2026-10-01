@@ -1,4 +1,4 @@
-# Commercial Director v1.0.1 — Context Notes
+# Commercial Director v1.0.2 — Context Notes
 
 ## Product thesis
 Commercial Director turns one product image into a structured advertising decision system. v1.0.0 stops before expensive media generation and validates whether users can move from a product image to a strong shortlist of campaign directions.
@@ -154,3 +154,21 @@ Stage 1 PostgreSQL runtime work remains intentionally gated until the four basel
 - Generation operations retry once by default; successful creative work is never repeated solely because tracking bookkeeping fails.
 - GitHub Actions now boots PostgreSQL 17, pushes the Drizzle schema, and runs the full E2E against DB-backed persistence.
 - v1.0.1 full CI gate passed on 2026-10-01.
+
+
+## v1.0.2 AI engine optimization — in progress
+Goals:
+- Prevent persistence failures from triggering duplicate AI generation.
+- Retry individual model calls rather than repeating the entire campaign whenever possible.
+- Reduce prompt payload for set-level quality review and slot repair.
+- Strengthen deterministic 4 × 5 matrix validation before model-level review.
+- Assign canonical concept IDs from territory + execution type so slots remain stable regardless of model ordering.
+- Repair only the affected slot or structurally invalid territory, with strict upper bounds.
+- Preserve the provider abstraction and fixture-mode determinism.
+
+Acceptance gate:
+- PostgreSQL 17 schema push passes.
+- Typecheck, ESLint, and production build pass.
+- Existing DB-backed Playwright flow passes.
+- Fixture campaign still yields exactly four territories and exactly one concept per required execution type in each territory.
+- Campaign and concept refinement generation jobs still persist succeeded/failed state without duplicate generation on persistence errors.
