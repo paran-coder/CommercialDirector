@@ -34,9 +34,9 @@ export function createProductionFixture(input: {
   const review: ProductionReview = {
     continuitySummary: {
       rules: [
-        "Product identity locks remain authoritative in every duration and shot.",
-        "The core concept mechanism must remain recognizable across 15s, 30s, and 45s.",
-        "Scene and shot variation may change pacing but must not introduce unapproved campaign assets.",
+        "모든 길이와 Shot에서 Product Identity Locks를 최우선 기준으로 유지합니다.",
+        "15초·30초·45초 모두에서 핵심 Concept 메커니즘을 알아볼 수 있어야 합니다.",
+        "Scene과 Shot의 변화는 속도감을 바꿀 수 있지만 승인되지 않은 Asset을 추가하면 안 됩니다.",
       ],
       risks: [],
     },
@@ -51,16 +51,16 @@ function createTreatment<D extends 15 | 30 | 45>(concept: Concept, duration: D):
   const b = round(duration * 0.68);
   return {
     duration,
-    logline: `${concept.hook} The product drives the payoff while preserving the same core mechanism at ${duration} seconds.`,
+    logline: `\${concept.hook} \${duration}초 버전에서도 같은 핵심 메커니즘을 유지하고 제품이 payoff를 이끕니다.`,
     pacing: duration === 15
-      ? "Immediate visual hook, compressed escalation, decisive product payoff."
+      ? "즉시 이해되는 시각 Hook, 압축된 전개, 분명한 제품 payoff."
       : duration === 30
-        ? "Clear setup, controlled escalation, product-led payoff with one reaction beat."
-        : "Atmospheric setup, fuller escalation, additional product detail, and a held payoff.",
+        ? "명확한 setup, 절제된 고조, 한 번의 반응 beat를 포함한 제품 중심 payoff."
+        : "분위기 있는 setup, 더 충분한 전개, 추가 제품 디테일, 여유 있게 유지되는 payoff.",
     beats: [
-      { start: 0, end: a, beat: `Establish the hook: ${concept.hook}`, productRole: concept.productRole },
-      { start: a, end: b, beat: `Develop the mechanism: ${concept.idea.slice(0, 180)}`, productRole: concept.productRole },
-      { start: b, end: duration, beat: `Resolve on the product and audience takeaway: ${concept.audienceTakeaway}`, productRole: concept.productRole },
+      { start: 0, end: a, beat: `Hook 설정: \${concept.hook}`, productRole: concept.productRole },
+      { start: a, end: b, beat: `메커니즘 전개: \${concept.idea.slice(0, 180)}`, productRole: concept.productRole },
+      { start: b, end: duration, beat: `제품과 타깃 인상으로 마무리: \${concept.audienceTakeaway}`, productRole: concept.productRole },
     ],
   };
 }
@@ -73,39 +73,39 @@ function createScenes(concept: Concept, assetBible: AssetBible, duration: 15 | 3
   return [
     {
       slot: 1,
-      title: "Hook",
+      title: "Hook · 도입",
       duration: first,
-      storyPurpose: "Establish the concept's visual rule and immediate audience curiosity.",
+      storyPurpose: "Concept의 시각 규칙을 제시하고 즉각적인 호기심을 만듭니다.",
       action: compactText(concept.hook, 360),
       productRole: concept.productRole,
       assetRefs: refs,
-      continuityIn: ["Begin from the approved campaign world and Asset Bible state."],
-      continuityOut: ["Carry the established product orientation and environmental light logic into escalation."],
-      soundIntent: "A restrained opening cue that makes the visual hook feel intentional.",
+      continuityIn: ["승인된 캠페인 세계관과 Asset Bible 상태에서 시작합니다."],
+      continuityOut: ["확립된 제품 방향과 환경 조명 규칙을 다음 전개로 이어갑니다."],
+      soundIntent: "시각 Hook이 의도적으로 느껴지게 하는 절제된 오프닝 사운드.",
     },
     {
       slot: 2,
-      title: "Mechanism",
+      title: "Mechanism · 핵심 전개",
       duration: second,
-      storyPurpose: "Demonstrate the concept mechanism with the product causally involved.",
+      storyPurpose: "제품이 원인으로 작동하도록 Concept 메커니즘을 보여줍니다.",
       action: compactText(concept.idea, 360),
       productRole: concept.productRole,
       assetRefs: refs,
-      continuityIn: ["Preserve product geometry, hero state, wardrobe, and spatial logic from the hook."],
-      continuityOut: ["End with a motivated visual state that can resolve cleanly into the payoff."],
-      soundIntent: "Build texture and rhythm without overpowering product or performance cues.",
+      continuityIn: ["Hook에서 설정한 제품 기하, Hero 상태, Wardrobe, 공간 논리를 유지합니다."],
+      continuityOut: ["payoff로 자연스럽게 이어질 수 있는 시각 상태로 마무리합니다."],
+      soundIntent: "제품과 퍼포먼스를 덮지 않으면서 질감과 리듬을 쌓습니다.",
     },
     {
       slot: 3,
-      title: "Payoff",
+      title: "Payoff · 마무리",
       duration: third,
-      storyPurpose: "Land the audience takeaway and finish with a controlled product-led resolution.",
+      storyPurpose: "타깃이 받아갈 인상을 남기고 절제된 제품 중심 마무리로 끝냅니다.",
       action: compactText(concept.audienceTakeaway, 360),
       productRole: concept.productRole,
       assetRefs: refs,
-      continuityIn: ["Retain all established product and campaign continuity from the mechanism."],
-      continuityOut: ["Finish on a stable final product identity suitable for downstream packshot logic."],
-      soundIntent: "Resolve the sonic idea with a concise branded-feeling endpoint.",
+      continuityIn: ["Mechanism에서 설정한 제품과 캠페인 continuity를 모두 유지합니다."],
+      continuityOut: ["이후 packshot으로 연결하기 좋은 안정된 제품 정체성으로 끝냅니다."],
+      soundIntent: "브랜드감 있는 간결한 사운드 엔드포인트로 마무리합니다.",
     },
   ];
 }
@@ -119,29 +119,29 @@ function createShots(scenes: SceneDraft[]): ShotDraft[] {
         sceneSlot: scene.slot,
         slot: 1,
         duration: firstDuration,
-        framing: scene.slot === 1 ? "Controlled medium-wide establishing frame" : "Purposeful medium or close product-led frame",
-        cameraMovement: "Slow, motivated push or lateral drift with no arbitrary handheld motion",
-        lensIntent: "Natural cinematic perspective with controlled compression",
+        framing: scene.slot === 1 ? "절제된 미디엄 와이드 establishing frame" : "제품 중심의 의도적인 미디엄 또는 클로즈 frame",
+        cameraMovement: "불필요한 핸드헬드 없이 이유 있는 느린 push 또는 lateral drift",
+        lensIntent: "절제된 압축감을 가진 자연스러운 시네마틱 원근",
         subjectAction: compactText(`${scene.action} Begin the scene action clearly and preserve spatial orientation.`, 320),
-        productVisibility: "Product remains recognizable and materially consistent with product-main.",
-        lightingIntent: "Preserve the Asset Bible lighting logic and product surface response.",
+        productVisibility: "제품은 product-main과 소재/형태가 일치하며 알아볼 수 있게 유지합니다.",
+        lightingIntent: "Asset Bible의 조명 규칙과 제품 표면 반응을 유지합니다.",
         assetRefs: scene.assetRefs,
-        continuityNotes: [...scene.continuityIn, "Maintain screen direction and product orientation."],
-        transitionIntent: "Cut on motivated action or visual change.",
+        continuityNotes: [...scene.continuityIn, "화면 진행 방향과 제품 방향을 유지합니다."],
+        transitionIntent: "이유 있는 동작 또는 시각 변화에서 컷합니다.",
       },
       {
         sceneSlot: scene.slot,
         slot: 2,
         duration: secondDuration,
-        framing: scene.slot === 3 ? "Resolved product-forward close or hero frame" : "Tighter detail or reaction frame",
-        cameraMovement: "Controlled continuation of the established camera language",
-        lensIntent: "Slightly tighter optical emphasis without distorting product geometry",
+        framing: scene.slot === 3 ? "제품 중심으로 해결되는 close 또는 hero frame" : "더 타이트한 detail 또는 reaction frame",
+        cameraMovement: "설정된 카메라 언어를 절제되게 이어갑니다.",
+        lensIntent: "제품 기하를 왜곡하지 않는 범위에서 조금 더 타이트한 optical emphasis",
         subjectAction: compactText(`${scene.action} Complete the scene action and hand off the intended continuity state.`, 320),
-        productVisibility: "Product identity and label/silhouette relationship remain intact.",
-        lightingIntent: "Match the established direction, contrast, practicals, and material response.",
+        productVisibility: "제품 정체성과 라벨/실루엣 관계를 그대로 유지합니다.",
+        lightingIntent: "설정된 광원 방향, 대비, practical light, 소재 반응을 맞춥니다.",
         assetRefs: scene.assetRefs,
-        continuityNotes: [...scene.continuityOut, "Do not introduce new production elements."],
-        transitionIntent: scene.slot === 3 ? "Hold the resolution cleanly." : "Transition into the next causal story beat.",
+        continuityNotes: [...scene.continuityOut, "새로운 제작 요소를 추가하지 않습니다."],
+        transitionIntent: scene.slot === 3 ? "마무리 상태를 깔끔하게 유지합니다." : "다음 인과적 story beat로 전환합니다.",
       },
     ];
   });
