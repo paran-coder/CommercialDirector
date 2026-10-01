@@ -43,6 +43,10 @@ export class PostgresReferenceAssetRepository implements ReferenceAssetRepositor
   }
 
   async saveRevision(projectId: string, input: ReferenceAssetRevisionSaveInput) {
+    if (input.renderRequest.projectId !== projectId) {
+      throw new Error("Reference Asset render request belongs to a different project.");
+    }
+
     return this.db.transaction(async (tx) => {
       const [sourceRow] = await tx
         .select({ revision: max(assetBibleRevisions.revision) })
