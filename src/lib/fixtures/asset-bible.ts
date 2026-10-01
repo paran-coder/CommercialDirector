@@ -36,36 +36,36 @@ export function createAssetBibleFixture(input: {
   const productSheet: ProductSheetDraft = {
     identityStatement: input.product.summary,
     preserve: [
-      "Preserve the approved silhouette and overall proportions.",
-      "Preserve visible cap, label, logo, and product-color relationships.",
-      "Keep all visible identity-lock features recognizable in every setup.",
+      "승인된 실루엣과 전체 비율을 유지합니다.",
+      "보이는 캡, 라벨, 로고, 제품 색상 관계를 유지합니다.",
+      "모든 setup에서 Identity Lock 특징을 알아볼 수 있게 유지합니다.",
     ],
     formRules: [
-      `Maintain the original ${input.product.visual.form.toLowerCase()} geometry.`,
-      "Do not stretch, compress, taper, or stylize the pack shape between shots.",
+      `원본 형태(\${input.product.visual.form})의 기하와 비율을 유지합니다.`,
+      "Shot 사이에서 패키지 형태를 늘리거나 눌러 변형하지 않습니다.",
     ],
     materialsAndSurface: [
-      ...input.product.visual.materials.map((material) => `Render ${material} with physically plausible surface response.`),
-      ...input.product.visual.finish.map((finish) => `Preserve the ${finish} finish behavior under changing light.`),
+      ...input.product.visual.materials.map((material) => `\${material} 소재가 실제처럼 빛에 반응하도록 표현합니다.`),
+      ...input.product.visual.finish.map((finish) => `조명이 바뀌어도 \${finish} 마감 특성을 유지합니다.`),
     ].slice(0, 8),
     colorAndMarkingRules: [
-      `Primary product color remains ${input.product.visual.primaryColor}.`,
-      `Secondary product color remains ${input.product.visual.secondaryColor}.`,
-      "Keep label/logo placement and contrast consistent with the source product.",
+      `주요 제품 색상은 \${input.product.visual.primaryColor}로 유지합니다.`,
+      `보조 제품 색상은 \${input.product.visual.secondaryColor}로 유지합니다.`,
+      "라벨/로고 위치와 대비는 원본 제품과 일치시킵니다.",
     ],
     scaleAndHandling: [
-      "Keep bottle scale consistent relative to hand and tabletop references.",
-      "Handling must feel premium and deliberate rather than weightless or toy-like.",
+      "손과 테이블 기준으로 보틀 크기를 일관되게 유지합니다.",
+      "제품 핸들링은 가볍거나 장난감처럼 보이지 않고 프리미엄하고 의도적으로 보여야 합니다.",
     ],
     heroAngles: [
-      "Three-quarter front angle that preserves silhouette and label readability.",
-      "Controlled side angle for material and reflective behavior.",
-      "Macro detail only when it remains anatomically consistent with the full product.",
+      "실루엣과 라벨 가독성을 유지하는 정면 3/4 앵글.",
+      "소재와 반사 특성을 보여주는 절제된 측면 앵글.",
+      "전체 제품 구조와 일치할 때만 매크로 디테일을 사용합니다.",
     ],
     avoid: [
-      "Do not invent secondary packaging, closures, labels, or accessories.",
-      "Do not alter proportions for dramatic perspective.",
-      "Do not replace source materials with generic plastic or chrome.",
+      "보이지 않은 2차 패키지, 마개, 라벨, 액세서리를 새로 만들지 않습니다.",
+      "드라마틱한 원근감을 위해 제품 비율을 바꾸지 않습니다.",
+      "원본 소재를 일반 플라스틱이나 크롬으로 바꾸지 않습니다.",
     ],
     continuityLocks: [
       "Silhouette",
@@ -78,74 +78,74 @@ export function createAssetBibleFixture(input: {
 
   const hero: HeroDraft = {
     applicability: heroNeeded ? "required" : "none",
-    role: heroNeeded ? input.bible.hero.persona : "No human hero is required for the selected concepts.",
-    castingDirection: heroNeeded ? `${input.bible.hero.ageRange}; ${input.bible.hero.persona}.` : "Not applicable.",
-    appearanceAndGrooming: heroNeeded ? "Controlled, contemporary grooming with understated finish and no distracting statement details." : "Not applicable.",
-    performanceDirection: heroNeeded ? "Restrained confidence, precise movement, and no overt beauty-ad posing." : "Not applicable.",
-    relationshipToProduct: heroNeeded ? "The hero treats the product as an intentional personal object; handling is specific, calm, and causally linked to the concept." : "Product carries the visual narrative without a human lead.",
+    role: heroNeeded ? input.bible.hero.persona : "선택한 Concept에는 사람 Hero가 필요하지 않습니다.",
+    castingDirection: heroNeeded ? `${input.bible.hero.ageRange}; ${input.bible.hero.persona}.` : "해당 없음.",
+    appearanceAndGrooming: heroNeeded ? "과한 포인트 없이 절제되고 현대적인 그루밍을 유지합니다." : "Not applicable.",
+    performanceDirection: heroNeeded ? "절제된 자신감과 정확한 움직임을 유지하고 전형적인 뷰티 광고 포즈는 피합니다." : "Not applicable.",
+    relationshipToProduct: heroNeeded ? "Hero는 제품을 의도적인 개인 소지품처럼 다루며, 핸들링은 구체적이고 차분하며 Concept의 원인과 연결됩니다." : "사람 주인공 없이 제품이 시각적 내러티브를 이끕니다.",
     continuityLocks: heroNeeded
-      ? ["Casting identity", "Hair shape", "Makeup finish", "Jewelry family", "Performance restraint"]
+      ? ["캐스팅 정체성", "헤어 형태", "메이크업 마감", "주얼리 계열", "절제된 퍼포먼스"]
       : [
-          "No human hero introduced unless the Asset Bible is regenerated.",
-          "Keep human presence incidental and non-recurring across selected concepts.",
+          "Asset Bible을 재생성하지 않는 한 사람 Hero를 새로 추가하지 않습니다.",
+          "사람의 등장은 보조적으로만 사용하고 선택 Concept 전반에 반복 캐릭터로 만들지 않습니다.",
         ],
     conceptRefs: heroNeeded ? heroRefs : refs,
   };
 
   const wardrobe: WardrobeDraft[] = heroNeeded ? [{
-    label: "Primary evening look",
-    silhouette: "Minimal tailored evening silhouette with clean vertical lines and controlled volume.",
-    materials: ["matte tailoring", "silk or satin accent"],
+    label: "메인 이브닝 룩",
+    silhouette: "깔끔한 수직선과 절제된 볼륨을 가진 미니멀 테일러드 이브닝 실루엣.",
+    materials: ["매트한 테일러링 소재", "실크 또는 새틴 포인트"],
     palette: input.bible.palette.slice(0, 4),
-    stylingNotes: ["One warm metallic accent", "No visible logos", "Keep styling modern rather than ornate"],
-    continuityLocks: ["Same core look within a concept", "Metal accent family remains consistent"],
+    stylingNotes: ["따뜻한 금속 포인트 하나", "눈에 띄는 로고 금지", "장식적이기보다 현대적으로 유지"],
+    continuityLocks: ["Concept 안에서 핵심 룩 유지", "금속 포인트 계열 일관성 유지"],
     conceptRefs: heroRefs,
   }] : [];
 
   const fallbackLocations = input.bible.locations.slice(0, 3);
   const locationEntries = [...locationRefs.entries()];
   const locationNames = [...new Set([...locationEntries.map(([name]) => name), ...fallbackLocations])].slice(0, 6);
-  while (locationNames.length < 3) locationNames.push(`Campaign environment ${locationNames.length + 1}`);
+  while (locationNames.length < 3) locationNames.push(`캠페인 환경 \${locationNames.length + 1}`);
 
   const locations: LocationDraft[] = locationNames.map((label) => ({
     label,
     environmentType: label,
-    spatialDescription: `A controlled ${label.toLowerCase()} interpretation inside the campaign's ${input.bible.visualWorld.keywords.slice(0, 3).join(", ")} visual world.`,
-    materials: ["dark architectural surfaces", "select reflective details"],
+    spatialDescription: `캠페인의 \${input.bible.visualWorld.keywords.slice(0, 3).join(", ")} 세계관 안에서 \${label}을 절제되게 해석한 공간입니다.`,
+    materials: ["어두운 건축 표면", "선별된 반사 디테일"],
     palette: input.bible.palette.slice(0, 5),
-    lightingWindow: input.bible.lighting[0] ?? "controlled low-key lighting",
+    lightingWindow: input.bible.lighting[0] ?? "절제된 로우키 조명",
     practicalCues: input.bible.lighting.slice(0, 3),
-    continuityLocks: ["Material family", "Palette", "Practical-light logic", "Degree of reflectivity"],
+    continuityLocks: ["소재 계열", "팔레트", "실용광 규칙", "반사 정도"],
     conceptRefs: locationRefs.get(label) ?? refs,
   }));
 
   const fallbackProps = input.bible.props.slice(0, 2);
   const propEntries = [...propRefs.entries()];
   const propNames = [...new Set([...propEntries.map(([name]) => name), ...fallbackProps])].slice(0, 8);
-  while (propNames.length < 2) propNames.push(`Campaign prop ${propNames.length + 1}`);
+  while (propNames.length < 2) propNames.push(`캠페인 Prop \${propNames.length + 1}`);
 
   const props: PropDraft[] = propNames.map((label) => ({
     label,
-    productionRole: "Supports the selected concept mechanism without competing with the product.",
-    materialAndFinish: "Premium, restrained finish consistent with the campaign material language.",
+    productionRole: "제품보다 튀지 않으면서 선택 Concept의 메커니즘을 지원합니다.",
+    materialAndFinish: "캠페인 소재 언어와 맞는 프리미엄하고 절제된 마감.",
     palette: input.bible.palette.slice(0, 3),
-    handlingAndUse: "Use only when motivated by the selected concept action.",
-    placementAndStaging: "Stage with deliberate negative space and keep the product visually dominant.",
-    continuityLocks: ["Material finish", "Scale", "Placement logic"],
+    handlingAndUse: "선택 Concept의 동작에 이유가 있을 때만 사용합니다.",
+    placementAndStaging: "의도적인 여백을 두고 제품이 시각적으로 가장 중요하게 보이도록 배치합니다.",
+    continuityLocks: ["소재 마감", "크기", "배치 규칙"],
     conceptRefs: propRefs.get(label) ?? refs,
   }));
 
   const review: AssetBibleReview = {
     globalContinuity: {
       rules: [
-        "Product identity locks override decorative concept styling.",
-        "Warm-metal and burgundy cues should recur without making every location identical.",
-        "Selected concepts may vary in mechanism, but camera restraint and premium material response remain consistent.",
+        "Product Identity Locks는 장식적인 Concept 스타일보다 우선합니다.",
+        "따뜻한 금속과 버건디 단서는 반복하되 모든 Location을 똑같게 만들지 않습니다.",
+        "Concept별 메커니즘은 달라도 절제된 카메라와 프리미엄 소재 반응은 일관되게 유지합니다.",
       ],
       conflicts: [],
       productionNotes: [
-        "Carry one controlled reflective logic across product, props, and environments.",
-        "Do not flatten intentional territory differences while maintaining product and hero continuity.",
+        "제품, Props, 환경 전반에 하나의 절제된 반사 규칙을 이어갑니다.",
+        "제품과 Hero continuity를 유지하되 Territory 간 의도적인 차이를 없애지 않습니다.",
       ],
     },
     issues: [],
