@@ -6,7 +6,13 @@ import type { AssetBible } from "@/domain/assets/schema";
 import type { ProductionPlan } from "@/domain/production/schema";
 import type { ProjectRuntimePatch, ProjectSnapshot } from "@/domain/project/schema";
 
-export type GenerationKind = "campaign" | "concept_refinement" | "asset_bible" | "production_plan";
+export type GenerationKind =
+  | "campaign"
+  | "concept_refinement"
+  | "asset_bible"
+  | "production_plan"
+  | "reference_asset"
+  | "continuity_check";
 export type GenerationStatus = "pending" | "running" | "succeeded" | "failed";
 
 export interface GenerationJobRecord {
