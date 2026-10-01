@@ -78,10 +78,10 @@ export function createAssetBibleFixture(input: {
 
   const hero: HeroDraft = {
     applicability: heroNeeded ? "required" : "none",
-    role: heroNeeded ? input.bible.hero.persona : "선택한 Concept에는 사람 Hero가 필요하지 않습니다.",
-    castingDirection: heroNeeded ? `${input.bible.hero.ageRange}; ${input.bible.hero.persona}.` : "해당 없음.",
-    appearanceAndGrooming: heroNeeded ? "과한 포인트 없이 절제되고 현대적인 그루밍을 유지합니다." : "해당 없음.",
-    performanceDirection: heroNeeded ? "절제된 자신감과 정확한 움직임을 유지하고 전형적인 뷰티 광고 포즈는 피합니다." : "해당 없음.",
+    role: heroNeeded ? `${input.bible.hero.persona}을 대표하는 메인 Hero` : "선택한 Concept에는 사람 Hero가 필요하지 않습니다.",
+    castingDirection: heroNeeded ? `${input.bible.hero.ageRange}; ${input.bible.hero.persona}을 유지하는 캐스팅 방향.` : "사람 Hero가 없어 캐스팅이 필요하지 않습니다.",
+    appearanceAndGrooming: heroNeeded ? "과한 포인트 없이 절제되고 현대적인 그루밍을 유지합니다." : "사람 Hero가 없어 외형과 그루밍 기준이 필요하지 않습니다.",
+    performanceDirection: heroNeeded ? "절제된 자신감과 정확한 움직임을 유지하고 전형적인 뷰티 광고 포즈는 피합니다." : "사람 Hero가 없어 퍼포먼스 지시가 필요하지 않습니다.",
     relationshipToProduct: heroNeeded ? "Hero는 제품을 의도적인 개인 소지품처럼 다루며, 핸들링은 구체적이고 차분하며 Concept의 원인과 연결됩니다." : "사람 주인공 없이 제품이 시각적 내러티브를 이끕니다.",
     continuityLocks: heroNeeded
       ? ["캐스팅 정체성", "헤어 형태", "메이크업 마감", "주얼리 계열", "절제된 퍼포먼스"]
