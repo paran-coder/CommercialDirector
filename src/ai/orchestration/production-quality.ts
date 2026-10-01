@@ -97,12 +97,18 @@ export function normalizeProductionPlan(
           sceneKeyBySlot.set(scene.slot, stableKey);
           sceneIndexBySlot.set(scene.slot, normalizedIndex);
           return {
-            ...scene,
             stableKey,
-            slot: undefined,
+            title: scene.title,
+            duration: scene.duration,
+            storyPurpose: scene.storyPurpose,
+            action: scene.action,
+            productRole: scene.productRole,
+            assetRefs: [...new Set(scene.assetRefs)],
+            continuityIn: scene.continuityIn,
+            continuityOut: scene.continuityOut,
+            soundIntent: scene.soundIntent,
           };
-        })
-        .map(({ slot: _slot, ...scene }) => scene);
+        });
 
       const sceneShotCounters = new Map<number, number>();
       let cursor = 0;
