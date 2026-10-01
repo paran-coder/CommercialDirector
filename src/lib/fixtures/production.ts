@@ -11,15 +11,25 @@ export function createProductionFixture(input: {
   concept: Concept;
   assetBible: AssetBible;
 }) {
-  const treatments = ([15, 30, 45] as const).map((duration) => createTreatment(input.concept, duration));
-  const sceneVariants = treatments.map((treatment) => ({
-    duration: treatment.duration,
-    scenes: createScenes(input.concept, input.assetBible, treatment.duration),
-  }));
-  const shotVariants = sceneVariants.map((variant) => ({
-    duration: variant.duration,
-    shots: createShots(variant.scenes),
-  }));
+  const treatments = [
+    createTreatment(input.concept, 15),
+    createTreatment(input.concept, 30),
+    createTreatment(input.concept, 45),
+  ] satisfies [
+    TreatmentDraft & { duration: 15 },
+    TreatmentDraft & { duration: 30 },
+    TreatmentDraft & { duration: 45 },
+  ];
+  const sceneVariants = [
+    { duration: 15 as const, scenes: createScenes(input.concept, input.assetBible, 15) },
+    { duration: 30 as const, scenes: createScenes(input.concept, input.assetBible, 30) },
+    { duration: 45 as const, scenes: createScenes(input.concept, input.assetBible, 45) },
+  ];
+  const shotVariants = [
+    { duration: 15 as const, shots: createShots(sceneVariants[0].scenes) },
+    { duration: 30 as const, shots: createShots(sceneVariants[1].scenes) },
+    { duration: 45 as const, shots: createShots(sceneVariants[2].scenes) },
+  ];
 
   const review: ProductionReview = {
     continuitySummary: {
@@ -36,7 +46,7 @@ export function createProductionFixture(input: {
   return { treatments, sceneVariants, shotVariants, review };
 }
 
-function createTreatment(concept: Concept, duration: 15 | 30 | 45): TreatmentDraft {
+function createTreatment<D extends 15 | 30 | 45>(concept: Concept, duration: D): TreatmentDraft & { duration: D } {
   const a = round(duration * 0.28);
   const b = round(duration * 0.68);
   return {
