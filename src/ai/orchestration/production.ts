@@ -19,6 +19,7 @@ import type { Concept } from "@/domain/concept/schema";
 import type { ProductIntelligence } from "@/domain/product/schema";
 import {
   normalizeProductionPlan,
+  validateProductionDrafts,
   validateProductionPlan,
   type ConceptProductionDraft,
   type ProductionStructuralIssue,
@@ -39,6 +40,17 @@ export async function buildProductionPlan(provider: AIProvider, input: BuildProd
   let drafts = await Promise.all(source.selectedConcepts.map((concept) =>
     generateConceptDraft(provider, input.assetBible, source.campaign, concept),
   ));
+  const repairedConcepts = new Set<string>();
+
+  const draftValidation = validateProductionDrafts(drafts, input.assetBible);
+  if (!draftValidation.valid) {
+    const preflightRepairs = buildRepairPlans(
+      { continuitySummary: defaultContinuity(input.assetBible), issues: [] },
+      draftValidation.issues,
+    );
+    for (const key of preflightRepairs.keys()) repairedConcepts.add(key);
+    drafts = await repairDrafts(provider, input.assetBible, source, drafts, preflightRepairs);
+  }
 
   let preliminary = normalizeProductionPlan(drafts, input.assetBible, defaultContinuity(input.assetBible));
   const structuralBefore = validateProductionPlan(preliminary, input.assetBible);
@@ -47,13 +59,8 @@ export async function buildProductionPlan(provider: AIProvider, input: BuildProd
   const repairPlans = buildRepairPlans(review, structuralBefore.issues);
 
   if (repairPlans.size > 0) {
-    drafts = await Promise.all(drafts.map(async (draft) => {
-      const repair = repairPlans.get(draft.conceptKey);
-      if (!repair) return draft;
-      const concept = source.selectedConcepts.find((item) => item.id === draft.conceptKey);
-      if (!concept) throw new Error(`Concept ${draft.conceptKey} not found for production repair.`);
-      return repairConceptDraft(provider, input.assetBible, source.campaign, concept, draft, repair);
-    }));
+    for (const key of repairPlans.keys()) repairedConcepts.add(key);
+    drafts = await repairDrafts(provider, input.assetBible, source, drafts, repairPlans);
     preliminary = normalizeProductionPlan(drafts, input.assetBible, review.continuitySummary);
     review = await reviewProduction(provider, source, preliminary, input.assetBible);
   }
@@ -71,9 +78,26 @@ export async function buildProductionPlan(provider: AIProvider, input: BuildProd
     quality: {
       passed: review.issues.length === 0,
       issues: review.issues,
-      repairedConcepts: [...repairPlans.keys()],
+      repairedConcepts: [...repairedConcepts],
     },
   };
+}
+
+
+async function repairDrafts(
+  provider: AIProvider,
+  assetBible: AssetBible,
+  source: ReturnType<typeof createSource>,
+  drafts: ConceptProductionDraft[],
+  repairPlans: Map<string, RepairPlan>,
+) {
+  return Promise.all(drafts.map(async (draft) => {
+    const repair = repairPlans.get(draft.conceptKey);
+    if (!repair) return draft;
+    const concept = source.selectedConcepts.find((item) => item.id === draft.conceptKey);
+    if (!concept) throw new Error(`Concept ${draft.conceptKey} not found for production repair.`);
+    return repairConceptDraft(provider, assetBible, source.campaign, concept, draft, repair);
+  }));
 }
 
 async function generateConceptDraft(
