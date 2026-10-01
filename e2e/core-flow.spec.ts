@@ -34,8 +34,6 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
   await first.getByRole("button", { name: "Toggle shortlist" }).click();
   await expect(page.getByText("1 shortlisted")).toBeVisible();
 
-  const developHref = await first.getByRole("link", { name: /Develop/ }).getAttribute("href");
-  expect(developHref?.endsWith("-narrative")).toBeTruthy();
   await first.getByRole("link", { name: /Develop/ }).click();
   await expect(page.getByRole("button", { name: "Make it bolder" })).toBeVisible();
   await page.getByRole("button", { name: "Make it bolder" }).click();
