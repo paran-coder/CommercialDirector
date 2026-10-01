@@ -69,19 +69,24 @@ export async function buildAssetBible(provider: AIProvider, input: BuildAssetBib
     props: productionResult.props,
   }, fixture.review);
 
-  const repairGroups = new Set(
-    review.issues.map((issue) =>
-      issue.section === "product" ? "product"
-        : issue.section === "hero" || issue.section === "wardrobe" ? "casting"
-          : "production",
-    ),
-  );
+  const preliminary = normalizeAssetBible({
+    productSheet: productResult.productSheet,
+    hero: castingResult.hero,
+    wardrobe: castingResult.wardrobe,
+    locations: productionResult.locations,
+    props: productionResult.props,
+    globalContinuity: review.globalContinuity,
+  });
+  const preliminaryStructural = validateAssetBible(preliminary, input.shortlist);
+
+  const repairGroups = new Set<"product" | "casting" | "production">();
+  for (const issue of review.issues) repairGroups.add(groupForSection(issue.section));
+  for (const issue of preliminaryStructural.issues) {
+    if (issue.section !== "global") repairGroups.add(groupForSection(issue.section));
+  }
 
   if (repairGroups.has("product")) {
-    const instruction = review.issues
-      .filter((issue) => issue.section === "product")
-      .map((issue) => issue.repairInstruction)
-      .join(" ");
+    const instruction = repairInstructionForGroup("product", review, preliminaryStructural.issues);
     productResult = await generateObjectWithRetry(provider, {
       name: "asset_bible_product_repair",
       schema: productSheetGenerationSchema,
@@ -93,10 +98,7 @@ export async function buildAssetBible(provider: AIProvider, input: BuildAssetBib
   }
 
   if (repairGroups.has("casting")) {
-    const instruction = review.issues
-      .filter((issue) => issue.section === "hero" || issue.section === "wardrobe")
-      .map((issue) => issue.repairInstruction)
-      .join(" ");
+    const instruction = repairInstructionForGroup("casting", review, preliminaryStructural.issues);
     castingResult = await generateObjectWithRetry(provider, {
       name: "asset_bible_casting_repair",
       schema: castingStylingGenerationSchema,
@@ -108,10 +110,7 @@ export async function buildAssetBible(provider: AIProvider, input: BuildAssetBib
   }
 
   if (repairGroups.has("production")) {
-    const instruction = review.issues
-      .filter((issue) => issue.section === "locations" || issue.section === "props")
-      .map((issue) => issue.repairInstruction)
-      .join(" ");
+    const instruction = repairInstructionForGroup("production", review, preliminaryStructural.issues);
     productionResult = await generateObjectWithRetry(provider, {
       name: "asset_bible_production_repair",
       schema: productionDesignGenerationSchema,
@@ -220,4 +219,25 @@ function createSourceContext(input: BuildAssetBibleInput) {
       };
     }),
   };
+}
+
+
+function groupForSection(section: "product" | "hero" | "wardrobe" | "locations" | "props") {
+  if (section === "product") return "product" as const;
+  if (section === "hero" || section === "wardrobe") return "casting" as const;
+  return "production" as const;
+}
+
+function repairInstructionForGroup(
+  group: "product" | "casting" | "production",
+  review: AssetBibleReview,
+  structuralIssues: Array<{ section: string; detail: string }>,
+) {
+  const reviewText = review.issues
+    .filter((issue) => groupForSection(issue.section) === group)
+    .map((issue) => issue.repairInstruction);
+  const structuralText = structuralIssues
+    .filter((issue) => issue.section !== "global" && groupForSection(issue.section as "product" | "hero" | "wardrobe" | "locations" | "props") === group)
+    .map((issue) => issue.detail);
+  return [...new Set([...reviewText, ...structuralText])].join(" ");
 }
