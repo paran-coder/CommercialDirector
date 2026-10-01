@@ -79,6 +79,7 @@ export function createLocalProject(product: ProductIntelligence, metadata?: { br
     shortlist: [],
     campaignRevisions: [],
     conceptRevisions: [],
+    assetBibleRevisions: [],
   };
   return cacheLocalProject(snapshot, true);
 }
