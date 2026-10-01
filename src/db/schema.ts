@@ -61,6 +61,7 @@ export const productionPlanRevisions = pgTable("production_plan_revisions", {
   sourceCampaignRevision: integer("source_campaign_revision").notNull(),
   sourceAssetBibleRevision: integer("source_asset_bible_revision").notNull(),
   sourceConceptKeys: jsonb("source_concept_keys").notNull(),
+  sourceConceptRevisions: jsonb("source_concept_revisions").notNull(),
   data: jsonb("data").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [uniqueIndex("production_plan_revision_unique").on(table.projectId, table.revision)]);
