@@ -1,4 +1,4 @@
-# Commercial Director v1.0.1 — Implementation Checklist
+# Commercial Director v1.0.2 — Implementation Checklist
 
 ## Phase 0 — Project records
 - [x] Create context-notes.md
@@ -92,3 +92,15 @@ CI provisions PostgreSQL 17, applies the Drizzle schema, and validates typecheck
 
 ## Definition of done for v1.0.1
 Completed. PostgreSQL is the runtime source of truth when configured, browser persistence remains the no-DB fallback, and the full CI gate passes against a real PostgreSQL service.
+
+
+## Phase 7 — v1.0.2 AI engine optimization
+- [ ] Add per-model-call bounded retry utility
+- [ ] Separate AI execution retry from persistence commit
+- [ ] Add strict 4 × 5 structural matrix validation
+- [ ] Canonicalize generated concept IDs by execution slot
+- [ ] Compact model-level quality-review payload
+- [ ] Limit repair peer context to relevant concepts
+- [ ] Keep repairs targeted and bounded
+- [ ] Add deterministic validation coverage through fixture E2E
+- [ ] Pass PostgreSQL-backed CI gate
