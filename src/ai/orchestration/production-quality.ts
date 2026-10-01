@@ -46,11 +46,14 @@ export function normalizeProductionPlan(
       const shotDrafts = findDuration(draft.shotVariants, duration, "shots", draft.conceptKey).shots;
 
       const sceneKeyBySlot = new Map<number, string>();
+      const sceneIndexBySlot = new Map<number, number>();
       const scenes = [...sceneDrafts]
         .sort((a, b) => a.slot - b.slot)
         .map((scene, index) => {
-          const stableKey = sceneKey(draft.conceptKey, duration, index + 1);
+          const normalizedIndex = index + 1;
+          const stableKey = sceneKey(draft.conceptKey, duration, normalizedIndex);
           sceneKeyBySlot.set(scene.slot, stableKey);
+          sceneIndexBySlot.set(scene.slot, normalizedIndex);
           return {
             ...scene,
             stableKey,
@@ -65,12 +68,13 @@ export function normalizeProductionPlan(
         .sort((a, b) => a.sceneSlot - b.sceneSlot || a.slot - b.slot)
         .map((shot) => {
           const sceneKeyValue = sceneKeyBySlot.get(shot.sceneSlot);
-          if (!sceneKeyValue) {
+          const normalizedSceneIndex = sceneIndexBySlot.get(shot.sceneSlot);
+          if (!sceneKeyValue || !normalizedSceneIndex) {
             throw new Error(`Shot references missing scene slot ${shot.sceneSlot} for ${draft.conceptKey} ${duration}s.`);
           }
           const withinScene = (sceneShotCounters.get(shot.sceneSlot) ?? 0) + 1;
           sceneShotCounters.set(shot.sceneSlot, withinScene);
-          const stableKey = shotKey(draft.conceptKey, duration, shot.sceneSlot, withinScene);
+          const stableKey = shotKey(draft.conceptKey, duration, normalizedSceneIndex, withinScene);
           const start = cursor;
           const end = cursor + shot.duration;
           cursor = end;
