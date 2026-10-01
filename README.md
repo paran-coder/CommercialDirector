@@ -1,97 +1,46 @@
-# Commercial Director v1.2.0
+# Commercial Director v1.2.1 — Korean UX Hotfix
 
-Commercial Director is a creative decision system that turns one product image into a campaign foundation, 20 advertising concepts, a reusable Asset Bible, and now a structured production plan for selected concepts.
+Commercial Director v1.2.1은 v1.2.0 Production Planning 기능은 그대로 유지하면서 한국어 사용성과 온보딩을 보강한다.
 
-## Product flow
+## 변경 사항
 
-`Product Image → Product Intelligence → Creative Brief → Campaign Bible → 20 Concepts → Shortlist 1–5 → Asset Bible → Treatments → Scenes → Shotlist → Prompt IR → Provider Prompt`
+- 일반 UI 문구 한국어화
+- 새로 생성되는 사용자용 AI 결과를 한국어 우선으로 변경
+- 핵심 제작 용어(Asset Bible, Shotlist, Prompt IR, Seedance/Kling/Veo 등)는 영문 유지/병기
+- 앱 내부 상세 사용자 매뉴얼 `/manual` 추가
+- Header / 프로젝트 navigation에 매뉴얼 진입점 추가
+- Open Graph / Twitter metadata에 `/og-image.png` 예약
+- OG 이미지 권장 크기 1200×630
 
-v1.2.0 does **not** render images or videos. It creates the production structure that later rendering systems consume.
+## 언어 원칙
 
-## v1.2.0
+사용자가 판단하고 읽어야 하는 설명은 한국어를 우선한다. 반면 canonical key, stable key, provider 이름, Prompt IR, 실제 영상 모델에 전달되는 compiled prompt 등 제작 파이프라인 계약은 영문을 유지한다.
 
-For each shortlisted concept with a current Asset Bible:
-- 15s treatment
-- 30s treatment
-- 45s treatment
-- Scene Graph
-- Shotlist
-- model-neutral Prompt IR
-- deterministic prompt compilation for Generic / Seedance / Kling / Veo
+기존 저장 revision은 보존한다. 이미 생성된 영문 Campaign/Concept/Asset Bible/Production Plan을 자동 변환하지 않으며 재생성되는 결과부터 한국어 생성 지시를 적용한다.
 
-## Core design constraints
+## 사용자 매뉴얼
 
-### Stable references
-Scenes and shots reference Asset Bible stable keys such as `product-main`, `hero-primary`, `location-01`, and `prop-01`.
+앱에서 `/manual`을 열면 전체 흐름과 각 단계의 목적, shortlist/revision/stale 상태, Asset Bible, Production Plan, Prompt IR 사용법을 확인할 수 있다.
 
-Model-generated labels are display text only. Application code owns canonical scene/shot IDs.
+## OG 이미지
 
-### One idea, three durations
-15/30/45s treatments must preserve one concept mechanism. Longer durations add pacing, setup, reaction, or payoff room rather than changing the idea.
+추후 다음 파일을 추가하면 된다.
 
-### Model-neutral first
-Prompt IR is the source of truth. Provider compilers only translate syntax/emphasis; they do not invent new production facts.
+`public/og-image.png`
 
-### Append-only revisions
-Production plans are revisioned and bound to their source Campaign revision, Asset Bible revision, shortlist, and shortlisted Concept revision snapshot.
+권장 크기: **1200×630**
 
-## Production UI
-
-New project navigation:
-
-`Product → Brief → Campaign → Concepts → Assets → Production`
-
-Production view:
-- concept selector
-- 15/30/45 treatment selector
-- Scene Graph
-- Shotlist
-- optional Pro Controls for Prompt IR/provider prompt inspection
-- revision and stale-source status
-
-## Architecture
-
-Existing stack remains:
-- Next.js 16 App Router + TypeScript + React 19
-- Tailwind CSS
-- PostgreSQL 17 + Drizzle ORM
-- Zod domain contracts
-- provider-agnostic structured AI layer
-- deterministic fixture provider
-- OpenAI Responses adapter
-- PostgreSQL repository + browser fallback
-- Playwright DB-backed E2E
+metadata 태그는 v1.2.1에서 미리 등록한다.
 
 ## Quality gate
 
 ```bash
-npm run db:push
 npm run typecheck
 npm run lint
 npm run build
 npm run test:e2e
 ```
 
-## Version boundary
-
-v1.2.0:
-- production planning
-- treatments
-- scenes
-- shotlists
-- prompt compilation
-
-v1.3.0:
-- reference asset generation
-- generated-media continuity checking
-
-v2.0.0:
-- image/video rendering
-- shot regeneration
-- assembly
-- packshot
-- social cutdowns
-
 ## Version
 
-Commercial-Director-v1.2.0
+Commercial-Director-v1.2.1
