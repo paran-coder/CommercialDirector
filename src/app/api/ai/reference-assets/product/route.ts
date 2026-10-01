@@ -16,6 +16,37 @@ const requestSchema = z.object({
   projectId: z.string().uuid(),
 });
 
+export async function GET(request: Request) {
+  try {
+    const projectId = z.string().uuid().parse(new URL(request.url).searchParams.get("projectId"));
+    const projectRepository = getProjectRepository();
+    const referenceAssetRepository = getReferenceAssetRepository();
+
+    if (!projectRepository || !referenceAssetRepository) {
+      return Response.json(
+        { error: "Reference Asset 조회에는 PostgreSQL runtime이 필요합니다." },
+        { status: 503 },
+      );
+    }
+
+    const project = await projectRepository.getProject(projectId);
+    if (!project) {
+      return Response.json({ error: "프로젝트를 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    const state = await referenceAssetRepository.getLatestRevisionState(projectId, "product-main");
+    const continuityChecks = await referenceAssetRepository.listContinuityChecks(projectId, "product-main");
+
+    return Response.json({
+      referenceAsset: state?.revision ?? null,
+      current: state?.current ?? false,
+      continuityChecks,
+    });
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = requestSchema.parse(await request.json());
@@ -106,17 +137,22 @@ export async function POST(request: Request) {
       referenceAsset: persistedRevision,
     });
   } catch (error) {
-    const message = error instanceof z.ZodError
-      ? "입력값 형식이 올바르지 않습니다."
-      : error instanceof Error
-        ? error.message
-        : "알 수 없는 오류가 발생했습니다.";
-    const generationId = error instanceof TrackedGenerationError ? error.generationId : null;
-    return Response.json({
-      error: message,
-      generationId,
-    }, {
-      status: error instanceof z.ZodError ? 400 : 500,
-    });
+    return errorResponse(error);
   }
+}
+
+function errorResponse(error: unknown) {
+  const message = error instanceof z.ZodError
+    ? "입력값 형식이 올바르지 않습니다."
+    : error instanceof Error
+      ? error.message
+      : "알 수 없는 오류가 발생했습니다.";
+  const generationId = error instanceof TrackedGenerationError ? error.generationId : null;
+
+  return Response.json({
+    error: message,
+    generationId,
+  }, {
+    status: error instanceof z.ZodError ? 400 : 500,
+  });
 }
