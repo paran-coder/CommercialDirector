@@ -54,6 +54,15 @@ export function getLocalProject(id: string): LocalProjectSnapshot | null {
   return safeParse(window.localStorage.getItem(projectKey(id)));
 }
 
+export function cacheLocalProject(snapshot: LocalProjectSnapshot, notify = false) {
+  if (!storageAvailable()) return snapshot;
+  const parsed = localProjectSnapshotSchema.parse(snapshot);
+  window.localStorage.setItem(projectKey(parsed.id), JSON.stringify(parsed));
+  writeIndex([parsed.id, ...readIndex()]);
+  if (notify) window.dispatchEvent(new CustomEvent("commercial-director:project-updated", { detail: { id: parsed.id } }));
+  return parsed;
+}
+
 export function createLocalProject(product: ProductIntelligence, metadata?: { brandName?: string; productName?: string }) {
   if (!storageAvailable()) throw new Error("Browser storage is unavailable.");
   const now = new Date().toISOString();
@@ -70,9 +79,7 @@ export function createLocalProject(product: ProductIntelligence, metadata?: { br
     campaignRevisions: [],
     conceptRevisions: [],
   };
-  window.localStorage.setItem(projectKey(id), JSON.stringify(snapshot));
-  writeIndex([id, ...readIndex()]);
-  return snapshot;
+  return cacheLocalProject(snapshot, true);
 }
 
 export function updateLocalProject(
@@ -83,10 +90,7 @@ export function updateLocalProject(
   const current = getLocalProject(id);
   if (!current) return null;
   const next = localProjectSnapshotSchema.parse({ ...current, ...patch, updatedAt: new Date().toISOString() });
-  window.localStorage.setItem(projectKey(id), JSON.stringify(next));
-  writeIndex([id, ...readIndex()]);
-  window.dispatchEvent(new CustomEvent("commercial-director:project-updated", { detail: { id } }));
-  return next;
+  return cacheLocalProject(next, true);
 }
 
 export function saveCampaignResult(
