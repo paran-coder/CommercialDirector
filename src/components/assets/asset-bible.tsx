@@ -57,7 +57,7 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
         }),
       });
       const body = await response.json();
-      if (!response.ok) throw new Error(body.error ?? "Asset Bible generation failed.");
+      if (!response.ok) throw new Error(body.error ?? "Asset Bible 생성에 실패했습니다.");
 
       const assetBible = assetBibleSchema.parse(body.assetBible);
       if (body.persisted) {
@@ -91,43 +91,43 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
         }
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Asset Bible generation failed.");
+      setError(caught instanceof Error ? caught.message : "Asset Bible 생성에 실패했습니다.");
     } finally {
       setGenerating(false);
     }
   }
 
   if (!loaded) {
-    return <div className="page-wrap"><p className="text-sm text-neutral-500">Loading assets…</p></div>;
+    return <div className="page-wrap"><p className="text-sm text-neutral-500">Asset Bible을 불러오는 중…</p></div>;
   }
 
   if (!project?.bible || !project.concepts || !project.territories || !project.product) {
     return <PrerequisiteState
       eyebrow="Asset Bible"
-      title="Build the campaign first."
-      body="Asset specifications are derived from an approved Campaign Bible and the concepts it produced."
+      title="먼저 캠페인을 만들어 주세요."
+      body="Asset 사양은 승인된 Campaign Bible과 그 안에서 생성된 Concept를 기준으로 만듭니다."
       href={`/projects/${projectId}/brief`}
-      action="Go to creative brief"
+      action="Creative Brief로 이동"
     />;
   }
 
   if (project.shortlist.length === 0) {
     return <PrerequisiteState
       eyebrow="Asset Bible"
-      title="Choose what deserves production."
-      body="Shortlist at least one concept before creating Hero, Wardrobe, Location, Prop, and Product Sheet specifications."
+      title="제작할 Concept를 먼저 선택해 주세요."
+      body="Product Sheet, Hero, Wardrobe, Location, Prop 사양을 만들기 전에 최소 1개의 Concept를 shortlist해야 합니다."
       href={`/projects/${projectId}/concepts`}
-      action="Review 20 concepts"
+      action="20개 Concept 검토"
     />;
   }
 
   if (project.shortlist.length > 5) {
     return <PrerequisiteState
       eyebrow="Asset Bible"
-      title="Narrow the production set."
-      body="Asset Bible supports one to five shortlisted concepts so the production world stays specific instead of averaging too many directions."
+      title="제작 후보를 5개 이하로 줄여 주세요."
+      body="Asset Bible은 1~5개의 shortlist를 기준으로 만듭니다. 너무 많은 방향을 섞으면 제작 세계관이 흐려집니다."
       href={`/projects/${projectId}/concepts`}
-      action="Narrow shortlist"
+      action="Shortlist 정리"
     />;
   }
 
@@ -138,15 +138,15 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
   if (!assetBible || !latestRevision) {
     return (
       <div className="page-wrap max-w-5xl">
-        <p className="eyebrow">Production specification</p>
-        <h1 className="mt-4 max-w-3xl text-4xl font-medium tracking-[-0.04em] sm:text-6xl">Build the Asset Bible.</h1>
+        <p className="eyebrow">제작 사양</p>
+        <h1 className="mt-4 max-w-3xl text-4xl font-medium tracking-[-0.04em] sm:text-6xl">Asset Bible을 만듭니다.</h1>
         <p className="mt-5 max-w-2xl text-sm leading-6 text-neutral-500">
-          Convert {project.shortlist.length} shortlisted concept{project.shortlist.length === 1 ? "" : "s"} into one reusable Product, Hero, Wardrobe, Location, and Prop system before scenes and shots are created.
+          선택한 {project.shortlist.length}개 Concept를 Scene과 Shot 제작 전에 재사용 가능한 Product, Hero, Wardrobe, Location, Prop 시스템으로 정리합니다.
         </p>
         <SourceConcepts concepts={project.concepts} shortlist={project.shortlist}/>
         <Button className="mt-8 gap-2" onClick={generate} disabled={generating}>
           {generating ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none"/> : null}
-          {generating ? "Building Asset Bible…" : "Build Asset Bible"}
+          {generating ? "Asset Bible 생성 중…" : "Asset Bible 만들기"}
         </Button>
         {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
       </div>
@@ -160,27 +160,27 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
           <p className="eyebrow">Production specification</p>
           <h1>Asset Bible</h1>
         </div>
-        <p>A reusable continuity source for the selected concepts. Future scenes and shots should reference these stable asset keys rather than reinventing production details.</p>
+        <p>선택한 Concept가 공통으로 참조하는 연속성 기준입니다. 이후 Scene과 Shot은 제작 정보를 다시 만들지 않고 이 stable asset key를 참조합니다.</p>
       </div>
 
       <section className="mt-7 flex flex-col gap-5 border-b border-neutral-950 pb-7 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex flex-wrap gap-2">
           <span className="tag">Revision {latestRevision.revision}</span>
           <span className="tag">Campaign r{latestRevision.sourceCampaignRevision}</span>
-          <span className="tag">{latestRevision.sourceConceptKeys.length} selected concepts</span>
+          <span className="tag">선택 Concept {latestRevision.sourceConceptKeys.length}개</span>
           <span className={current ? "tag border-neutral-950 text-neutral-950" : "tag border-amber-400 bg-amber-50 text-amber-800"}>
-            {current ? "Current" : "Out of date"}
+            {current ? "Current · 최신" : "Out of date · 재생성 필요"}
           </span>
         </div>
         <Button className="gap-2" onClick={generate} disabled={generating}>
           {generating ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none"/> : <RefreshCw size={14}/>}
-          {generating ? "Regenerating…" : "Regenerate"}
+          {generating ? "재생성 중…" : "재생성"}
         </Button>
       </section>
 
       {!current ? (
         <div className="mt-6 border-l-2 border-amber-500 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900">
-          The Campaign Bible or shortlist has changed since this Asset Bible was generated. The previous revision is preserved; regenerate to create a new production source.
+          이 Asset Bible을 만든 뒤 Campaign Bible 또는 shortlist가 변경되었습니다. 이전 revision은 보존되며, 현재 기준에 맞는 새 제작 소스를 만들려면 재생성해 주세요.
         </div>
       ) : null}
       {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
@@ -190,30 +190,30 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
       <AssetSection number="01" title="Product Sheet" description={assetBible.productSheet.identityStatement}>
         <AssetHeader stableKey={assetBible.productSheet.stableKey}/>
         <GridLists items={[
-          ["Preserve", assetBible.productSheet.preserve],
-          ["Form rules", assetBible.productSheet.formRules],
-          ["Materials & surface", assetBible.productSheet.materialsAndSurface],
-          ["Color & markings", assetBible.productSheet.colorAndMarkingRules],
-          ["Scale & handling", assetBible.productSheet.scaleAndHandling],
-          ["Hero angles", assetBible.productSheet.heroAngles],
-          ["Avoid", assetBible.productSheet.avoid],
-          ["Continuity locks", assetBible.productSheet.continuityLocks],
+          ["반드시 유지", assetBible.productSheet.preserve],
+          ["형태 규칙", assetBible.productSheet.formRules],
+          ["소재와 표면", assetBible.productSheet.materialsAndSurface],
+          ["색상과 표기", assetBible.productSheet.colorAndMarkingRules],
+          ["크기와 핸들링", assetBible.productSheet.scaleAndHandling],
+          ["Hero 앵글", assetBible.productSheet.heroAngles],
+          ["피해야 할 것", assetBible.productSheet.avoid],
+          ["Continuity Locks", assetBible.productSheet.continuityLocks],
         ]}/>
       </AssetSection>
 
       <AssetSection number="02" title="Hero" description={assetBible.hero.role}>
         <AssetHeader stableKey={assetBible.hero.stableKey} conceptRefs={assetBible.hero.conceptRefs}/>
         <div className="mt-5 grid gap-px overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--line)] md:grid-cols-2">
-          <TextCell title="Applicability" body={assetBible.hero.applicability}/>
-          <TextCell title="Casting" body={assetBible.hero.castingDirection}/>
-          <TextCell title="Appearance & grooming" body={assetBible.hero.appearanceAndGrooming}/>
-          <TextCell title="Performance" body={assetBible.hero.performanceDirection}/>
-          <TextCell title="Relationship to product" body={assetBible.hero.relationshipToProduct}/>
-          <ListCell title="Continuity locks" items={assetBible.hero.continuityLocks}/>
+          <TextCell title="필요 여부" body={assetBible.hero.applicability}/>
+          <TextCell title="캐스팅" body={assetBible.hero.castingDirection}/>
+          <TextCell title="외형과 그루밍" body={assetBible.hero.appearanceAndGrooming}/>
+          <TextCell title="연기/퍼포먼스" body={assetBible.hero.performanceDirection}/>
+          <TextCell title="제품과의 관계" body={assetBible.hero.relationshipToProduct}/>
+          <ListCell title="Continuity Locks" items={assetBible.hero.continuityLocks}/>
         </div>
       </AssetSection>
 
-      <AssetSection number="03" title="Wardrobe" description={assetBible.wardrobe.length ? "Reusable looks tied to the selected Hero and concepts." : "No wardrobe system is required for this selection."}>
+      <AssetSection number="03" title="Wardrobe" description={assetBible.wardrobe.length ? "선택한 Hero와 Concept에 반복 적용할 Wardrobe 기준입니다." : "이번 선택에는 별도의 Wardrobe 시스템이 필요하지 않습니다."}>
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
           {assetBible.wardrobe.map((look) => (
             <article key={look.stableKey} className="panel p-6">
@@ -221,17 +221,17 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
               <h3 className="mt-5 text-xl font-medium tracking-[-0.02em]">{look.label}</h3>
               <p className="mt-3 text-sm leading-6 text-neutral-600">{look.silhouette}</p>
               <MiniLists items={[
-                ["Materials", look.materials],
-                ["Palette", look.palette],
-                ["Styling", look.stylingNotes],
-                ["Locks", look.continuityLocks],
+                ["소재", look.materials],
+                ["팔레트", look.palette],
+                ["스타일링", look.stylingNotes],
+                ["고정 규칙", look.continuityLocks],
               ]}/>
             </article>
           ))}
         </div>
       </AssetSection>
 
-      <AssetSection number="04" title="Locations" description="Canonical environments that selected concepts can reuse without losing their individual mechanisms.">
+      <AssetSection number="04" title="Locations" description="각 Concept의 개성을 유지하면서 반복 사용할 수 있는 canonical Location 기준입니다.">
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
           {assetBible.locations.map((location) => (
             <article key={location.stableKey} className="panel p-6">
@@ -239,11 +239,11 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
               <h3 className="mt-5 text-xl font-medium tracking-[-0.02em]">{location.label}</h3>
               <p className="mt-2 text-xs font-medium uppercase tracking-[0.12em] text-neutral-400">{location.environmentType}</p>
               <p className="mt-4 text-sm leading-6 text-neutral-600">{location.spatialDescription}</p>
-              <p className="mt-4 text-sm leading-6"><span className="font-medium">Lighting window:</span> <span className="text-neutral-600">{location.lightingWindow}</span></p>
+              <p className="mt-4 text-sm leading-6"><span className="font-medium">조명 조건:</span> <span className="text-neutral-600">{location.lightingWindow}</span></p>
               <MiniLists items={[
                 ["Materials", location.materials],
                 ["Palette", location.palette],
-                ["Practical cues", location.practicalCues],
+                ["실무 단서", location.practicalCues],
                 ["Locks", location.continuityLocks],
               ]}/>
             </article>
@@ -251,7 +251,7 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
         </div>
       </AssetSection>
 
-      <AssetSection number="05" title="Props" description="Production objects with a defined role, finish, staging logic, and continuity contract.">
+      <AssetSection number="05" title="Props" description="역할, 마감, 배치 방식, continuity가 정해진 제작용 Prop입니다.">
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {assetBible.props.map((prop) => (
             <article key={prop.stableKey} className="panel p-6">
@@ -268,11 +268,11 @@ export function AssetBibleView({ projectId }: { projectId: string }) {
         </div>
       </AssetSection>
 
-      <AssetSection number="06" title="Global Continuity" description="Rules that keep the campaign coherent without flattening intentional differences between concepts.">
+      <AssetSection number="06" title="Global Continuity" description="Concept 사이의 의도적인 차이는 살리면서 전체 캠페인을 일관되게 유지하는 규칙입니다.">
         <div className="mt-5 grid gap-px overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--line)] md:grid-cols-3">
-          <ListCell title="Campaign rules" items={assetBible.globalContinuity.rules}/>
-          <ListCell title="Keep distinct" items={assetBible.globalContinuity.conflicts.length ? assetBible.globalContinuity.conflicts : ["No material cross-concept conflicts identified."]}/>
-          <ListCell title="Production notes" items={assetBible.globalContinuity.productionNotes}/>
+          <ListCell title="캠페인 공통 규칙" items={assetBible.globalContinuity.rules}/>
+          <ListCell title="의도적으로 구분할 것" items={assetBible.globalContinuity.conflicts.length ? assetBible.globalContinuity.conflicts : ["Concept 간 중대한 충돌 없음"]}/>
+          <ListCell title="제작 메모" items={assetBible.globalContinuity.productionNotes}/>
         </div>
       </AssetSection>
     </div>
