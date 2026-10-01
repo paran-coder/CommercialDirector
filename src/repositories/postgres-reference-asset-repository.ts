@@ -15,7 +15,6 @@ import {
 import type {
   ReferenceAssetRepository,
   ReferenceAssetRevisionSaveInput,
-  ReferenceAssetRevisionState,
 } from "@/repositories/reference-asset-repository";
 
 export class PostgresReferenceAssetRepository implements ReferenceAssetRepository {
@@ -118,18 +117,6 @@ export class PostgresReferenceAssetRepository implements ReferenceAssetRepositor
       .limit(1);
 
     return row ? referenceAssetRevisionSchema.parse(row.data) : null;
-  }
-
-  async getLatestRevisionState(projectId: string, stableKey: string): Promise<ReferenceAssetRevisionState | null> {
-    const revision = await this.getLatestRevision(projectId, stableKey);
-    if (!revision) return null;
-
-    const currentAssetBibleRevision = await this.getCurrentAssetBibleRevision(projectId);
-    return {
-      revision,
-      current: currentAssetBibleRevision !== null
-        && revision.sourceAssetBibleRevision === currentAssetBibleRevision,
-    };
   }
 
   async assertTargetExists(projectId: string, target: ReferenceAssetTarget, revision: number) {
