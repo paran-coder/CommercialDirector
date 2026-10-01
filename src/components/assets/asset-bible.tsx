@@ -305,6 +305,7 @@ async function loadProject(projectId: string): Promise<ProjectSnapshot | null> {
     }],
     conceptRevisions: [],
     assetBibleRevisions: [],
+    productionPlanRevisions: [],
   };
 }
 
