@@ -1,4 +1,4 @@
-# Commercial Director v1.0.1
+# Commercial Director v1.0.2
 
 Commercial Director is a creative decision system that turns one product image into a campaign foundation and 20 structured advertising directions.
 
@@ -37,6 +37,8 @@ The creative engine uses a controlled orchestration workflow rather than autonom
 5. Four independent Concept Generator jobs, one per territory
 6. Heuristic + model Quality Gate
 7. Slot-level repair for weak or overlapping concepts
+
+v1.0.2 keeps this architecture but makes it cheaper and safer: individual model calls have bounded retries, structural validation is deterministic, quality-review payloads are compact, repair context is limited to relevant peers, and persistence failures cannot cause a successful generation to run again.
 
 Every territory owns five execution slots: Narrative, Product Spectacle, Character, Sensory, and Social. This yields exactly 20 concepts.
 
@@ -107,8 +109,8 @@ GitHub Actions validates every dev/main push against a real PostgreSQL 17 servic
 - Concept revision persistence
 - Shortlist persistence
 
-The v1.0.1 CI gate is passing.
+The v1.0.1 PostgreSQL runtime gate is passing. v1.0.2 is optimizing the AI orchestration layer without changing the product flow.
 
 ## Version
 
-Commercial-Director-v1.0.1
+Commercial-Director-v1.0.2
