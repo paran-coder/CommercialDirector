@@ -5,6 +5,7 @@ import type { CampaignBible, Territory } from "@/domain/campaign/schema";
 import type { Concept } from "@/domain/concept/schema";
 import type { ProductIntelligence } from "@/domain/product/schema";
 import type { AssetBible } from "@/domain/assets/schema";
+import type { ProductionPlan } from "@/domain/production/schema";
 import { localProjectSnapshotSchema, type LocalProjectSnapshot } from "@/domain/project/schema";
 
 const PREFIX = "commercial-director:v1:project:";
@@ -80,13 +81,14 @@ export function createLocalProject(product: ProductIntelligence, metadata?: { br
     campaignRevisions: [],
     conceptRevisions: [],
     assetBibleRevisions: [],
+    productionPlanRevisions: [],
   };
   return cacheLocalProject(snapshot, true);
 }
 
 export function updateLocalProject(
   id: string,
-  patch: Partial<Pick<LocalProjectSnapshot, "brandName" | "productName" | "product" | "brief" | "bible" | "territories" | "concepts" | "shortlist" | "campaignRevisions" | "conceptRevisions" | "assetBible" | "assetBibleRevisions">>,
+  patch: Partial<Pick<LocalProjectSnapshot, "brandName" | "productName" | "product" | "brief" | "bible" | "territories" | "concepts" | "shortlist" | "campaignRevisions" | "conceptRevisions" | "assetBible" | "assetBibleRevisions" | "productionPlan" | "productionPlanRevisions">>,
 ) {
   if (!storageAvailable()) return null;
   const current = getLocalProject(id);
@@ -146,6 +148,34 @@ export function saveAssetBibleRevision(
         sourceCampaignRevision,
         sourceConceptKeys: [...new Set(sourceConceptKeys)],
         data: assetBible,
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  });
+}
+
+
+export function saveProductionPlanRevision(
+  id: string,
+  productionPlan: ProductionPlan,
+  sourceCampaignRevision: number,
+  sourceAssetBibleRevision: number,
+  sourceConceptKeys: string[],
+) {
+  const current = getLocalProject(id);
+  if (!current) return null;
+  const revisions = current.productionPlanRevisions ?? [];
+  const revision = revisions.length + 1;
+  return updateLocalProject(id, {
+    productionPlan,
+    productionPlanRevisions: [
+      ...revisions,
+      {
+        revision,
+        sourceCampaignRevision,
+        sourceAssetBibleRevision,
+        sourceConceptKeys: [...new Set(sourceConceptKeys)],
+        data: productionPlan,
         createdAt: new Date().toISOString(),
       },
     ],
