@@ -1,7 +1,9 @@
-import { integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { index, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 export const projectStatus = pgEnum("project_status", ["draft", "briefing", "generated", "archived"]);
 export const executionType = pgEnum("execution_type", ["narrative", "product_spectacle", "character", "sensory", "social"]);
+export const generationKind = pgEnum("generation_kind", ["campaign", "concept_refinement"]);
+export const generationStatus = pgEnum("generation_status", ["pending", "running", "succeeded", "failed"]);
 
 export const workspaces = pgTable("workspaces", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -63,6 +65,7 @@ export const conceptRevisions = pgTable("concept_revisions", {
   id: uuid("id").defaultRandom().primaryKey(),
   conceptId: uuid("concept_id").references(() => concepts.id, { onDelete: "cascade" }).notNull(),
   revision: integer("revision").notNull(),
+  instruction: text("instruction").default("Initial concept").notNull(),
   data: jsonb("data").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [uniqueIndex("concept_revision_unique").on(table.conceptId, table.revision)]);
@@ -72,3 +75,21 @@ export const shortlist = pgTable("shortlist", {
   conceptId: uuid("concept_id").references(() => concepts.id, { onDelete: "cascade" }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [primaryKey({ columns: [table.projectId, table.conceptId] })]);
+
+export const generationJobs = pgTable("generation_jobs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  kind: generationKind("kind").notNull(),
+  status: generationStatus("status").default("pending").notNull(),
+  attempt: integer("attempt").default(0).notNull(),
+  maxAttempts: integer("max_attempts").default(2).notNull(),
+  input: jsonb("input").notNull(),
+  output: jsonb("output"),
+  error: text("error"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+}, (table) => [
+  index("generation_jobs_project_created_idx").on(table.projectId, table.createdAt),
+  index("generation_jobs_status_idx").on(table.status),
+]);
