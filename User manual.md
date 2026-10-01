@@ -1,4 +1,4 @@
-# Commercial Director v1.0.1 — User Manual
+# Commercial Director v1.0.2 — User Manual
 
 ## 1. Start a campaign
 From **Projects**, select **New Campaign**. Add one clear product image. Brand and product names are optional.
@@ -53,7 +53,7 @@ Each of the four territories contains one concept in each execution type:
 4. Sensory
 5. Social
 
-Use territory filters to compare ideas. The bookmark control adds or removes a concept from the shortlist and persists in the local project snapshot.
+Use territory filters to compare ideas. The bookmark control adds or removes a concept from the shortlist. With PostgreSQL configured this is persisted server-side; otherwise the browser fallback is used.
 
 ## 6. Develop a concept
 Open **Develop** on a card. Concept Detail shows:
@@ -72,7 +72,7 @@ For a campaign generated from your own brief, refine one slot without regenerati
 - Reduce production complexity
 - Make the product more prominent
 
-The initial concept is preserved before the first revision, and each new revision is appended to local revision history.
+The initial concept is preserved before the first revision, and each new revision is appended to revision history. With PostgreSQL configured this history is server-persisted.
 
 ### Pro Controls
 Enable **Pro controls** for:
@@ -116,3 +116,7 @@ The baseline is accepted only when typecheck, lint, production build, and the fi
 When DATABASE_URL is configured, new projects use server persistence automatically. Product intelligence, briefs, campaign revisions, 20 concepts, shortlist state, concept refinements, and generation status survive browser/device sessions. Without DATABASE_URL the app keeps the local prototype fallback.
 
 For local PostgreSQL development, set DATABASE_URL and run `npm run db:push` before `npm run dev`.
+
+
+## AI engine behavior (v1.0.2)
+The visible workflow is unchanged. Internally, generation failures are retried at the smallest useful model-call boundary. A successful AI result is not regenerated merely because database persistence or generation-job bookkeeping fails. Quality review uses a compact campaign summary and repairs remain limited to the affected concept slots.
