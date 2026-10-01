@@ -1,4 +1,4 @@
-# Commercial Director v1.2.0 — In Development
+# Commercial Director v1.2.0
 
 Commercial Director is a creative decision system that turns one product image into a campaign foundation, 20 advertising concepts, a reusable Asset Bible, and now a structured production plan for selected concepts.
 
@@ -8,7 +8,7 @@ Commercial Director is a creative decision system that turns one product image i
 
 v1.2.0 does **not** render images or videos. It creates the production structure that later rendering systems consume.
 
-## v1.2.0 target
+## v1.2.0
 
 For each shortlisted concept with a current Asset Bible:
 - 15s treatment
@@ -33,9 +33,9 @@ Model-generated labels are display text only. Application code owns canonical sc
 Prompt IR is the source of truth. Provider compilers only translate syntax/emphasis; they do not invent new production facts.
 
 ### Append-only revisions
-Production plans are revisioned and bound to their source Campaign revision, Asset Bible revision, and shortlist.
+Production plans are revisioned and bound to their source Campaign revision, Asset Bible revision, shortlist, and shortlisted Concept revision snapshot.
 
-## Planned UI
+## Production UI
 
 New project navigation:
 
