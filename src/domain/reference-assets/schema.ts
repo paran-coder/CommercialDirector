@@ -51,7 +51,10 @@ export const renderRequestSchema = z.object({
 
 export const renderResultSchema = z.object({
   requestId: z.string().min(1),
-  artifact: renderArtifactSchema,
+  imageBase64: z.string().min(1),
+  mimeType: z.enum(["image/png", "image/jpeg", "image/webp"]),
+  width: z.number().int().positive().optional(),
+  height: z.number().int().positive().optional(),
   generatedAt: z.string().datetime(),
 });
 
@@ -60,7 +63,7 @@ export const referenceAssetRevisionSchema = z.object({
   sourceAssetBibleRevision: z.number().int().positive(),
   target: referenceAssetTargetSchema,
   renderRequest: renderRequestSchema,
-  renderResult: renderResultSchema,
+  artifact: renderArtifactSchema,
   createdAt: z.string().datetime(),
 }).superRefine((value, ctx) => {
   if (value.sourceAssetBibleRevision !== value.renderRequest.sourceAssetBibleRevision) {
