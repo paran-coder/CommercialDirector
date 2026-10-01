@@ -1,113 +1,32 @@
-# Commercial Director v1.2.0 — User Manual
+# Commercial Director v1.2.1 — 사용자 매뉴얼
 
-## 1. Complete Assets first
-Production Planning requires a **current** Asset Bible.
+앱 내부 상세 매뉴얼은 `/manual`에서 제공한다.
 
-Before opening Production:
-1. build the Campaign Bible and 20 concepts,
-2. shortlist 1–5 concepts,
-3. build the Asset Bible,
-4. ensure Assets shows **Current**.
-
-If the Campaign Bible or shortlist changes, regenerate the Asset Bible before generating a new Production Plan.
-
-## 2. Open Production
-Choose **Production** in the project navigation.
-
-The intended navigation becomes:
+## 빠른 흐름
 
 `Product → Brief → Campaign → Concepts → Assets → Production`
 
-## 3. Generate the Production Plan
-Choose **Build Production Plan**.
+1. 제품 이미지를 업로드하고 Product Intelligence를 확인한다.
+2. Creative Brief에 브랜드 성격, 타깃, 핵심 효익, 무드를 입력한다.
+3. Campaign Bible과 4개 Territory, 20개 Concept를 생성한다.
+4. 실제로 제작할 Concept 1–5개를 shortlist한다.
+5. Asset Bible을 생성해 Product Sheet, Hero, Wardrobe, Locations, Props의 연속성을 고정한다.
+6. Production Plan을 생성해 15/30/45초 Treatment, Scene Graph, Shotlist, Prompt IR을 만든다.
 
-Commercial Director generates production planning only for shortlisted concepts.
+## 언어
+일반 설명과 새 AI 결과는 한국어를 우선한다. Asset Bible, Prompt IR, Seedance/Kling/Veo 같은 제작 표준 용어와 provider prompt는 영문을 유지할 수 있다.
 
-## 4. Choose a concept
-Use the concept selector to switch between shortlisted concepts.
+## Revision
+AI 결과를 다시 생성하면 기존 결과를 덮어쓰지 않고 새 revision을 추가한다.
 
-Each concept keeps its own treatments, scenes, shots, and compiled prompt bundles inside the same Production Plan revision.
+## Current / Out of date
+- Current: 현재 상위 소스와 일치하는 최신 결과
+- Out of date: Campaign, shortlist, Asset Bible 또는 Concept revision이 바뀌어 이전 결과가 현재 소스와 맞지 않는 상태
 
-## 5. Choose 15s, 30s, or 45s
-The duration selector changes pacing while preserving the same core concept.
+Out of date 결과는 기록으로 남고, 현재 소스를 기준으로 다시 생성하면 새 revision이 추가된다.
 
-- **15s** — compressed mechanism and payoff
-- **30s** — full setup/action/payoff
-- **45s** — more atmosphere, performance, product detail, or reaction time
+## 상세 설명
+앱의 `/manual` 페이지에는 Product부터 Production까지 단계별 사용법, Asset Bible 구성, Production Plan과 Prompt IR 읽는 법, 문제 해결 방법을 상세하게 제공한다.
 
-## 6. Review Scene Graph
-Each Scene shows:
-- canonical scene key
-- duration target
-- story purpose
-- action
-- product role
-- Asset Bible references
-- continuity in/out state
-- audio/sound intent
-
-Scenes reference canonical Asset Bible keys rather than free-text recreations.
-
-## 7. Review Shotlist
-Expand a Scene to inspect its shots.
-
-Each Shot includes:
-- canonical shot key
-- timing
-- framing
-- camera movement
-- lens/optical intent
-- subject/action
-- product visibility
-- lighting
-- asset references
-- continuity notes
-- transition intent
-
-## 8. Inspect prompts in Pro Controls
-Prompt details are hidden behind Pro Controls by default.
-
-Prompt IR is the model-neutral source of truth. Provider views compile that same structure for:
-- Generic cinematic
-- Seedance
-- Kling
-- Veo
-
-Provider compilers may change syntax but should not change the creative facts.
-
-## 9. Revisions
-Regeneration creates a new append-only Production Plan revision.
-
-The page will show:
-- Production Plan revision
-- source Campaign revision
-- source Asset Bible revision
-- selected concept count
-- Current / Out of date state
-
-## 10. Out-of-date behavior
-A Production Plan becomes out of date when its bound Campaign, Asset Bible, shortlist, or shortlisted Concept revision changes.
-
-The previous revision remains available as historical production planning, but a new revision should be generated from the current source.
-
-## 11. What v1.2.0 does not do
-This version does not render:
-- images
-- reference frames
-- video clips
-- final edits
-
-It produces structured production plans and provider-ready text prompt bundles only.
-
-Reference asset generation is planned for v1.3.0. Actual media generation and assembly are planned for v2.0.0.
-
-## Developer verification
-
-```bash
-npm install
-npm run db:push
-npm run typecheck
-npm run lint
-npm run build
-npm run test:e2e
-```
+## OG 이미지
+추후 `public/og-image.png`에 1200×630 이미지를 넣으면 Open Graph와 Twitter 공유 이미지로 사용된다.
