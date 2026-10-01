@@ -26,6 +26,7 @@ export class OpenAIProvider implements AIProvider {
     const response = await this.client.responses.create({
       model: this.model,
       store: false,
+      reasoning: request.reasoningEffort ? { effort: request.reasoningEffort } : undefined,
       instructions: request.instructions,
       input: [{ role: "user", content }],
       text: {
