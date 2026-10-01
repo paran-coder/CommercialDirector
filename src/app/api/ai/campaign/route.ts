@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       ...generated.output,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof z.ZodError ? "입력값 형식이 올바르지 않습니다." : error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
     const generationId = error instanceof TrackedGenerationError ? error.generationId : null;
     return Response.json({ error: message, generationId }, { status: error instanceof z.ZodError ? 400 : 500 });
   }
