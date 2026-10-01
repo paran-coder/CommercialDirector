@@ -54,10 +54,6 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
   }, [plan, conceptKey]);
   const activeVariant = activeConcept?.variants.find((item) => item.duration === duration) ?? null;
 
-  useEffect(() => {
-    if (plan?.concepts[0] && !conceptKey) setConceptKey(plan.concepts[0].conceptKey);
-  }, [plan, conceptKey]);
-
   async function generate() {
     if (
       !project?.product ||
