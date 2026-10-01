@@ -12,6 +12,7 @@ const items = [
   ["Campaign", "campaign"],
   ["Concepts", "concepts"],
   ["Assets", "assets"],
+  ["Production", "production"],
 ] as const;
 
 export function ProjectFrame({ projectId, active, children }: { projectId: string; active: string; children: React.ReactNode }) {
@@ -53,7 +54,7 @@ export function ProjectFrame({ projectId, active, children }: { projectId: strin
           ))}
         </nav>
         <div className="mt-8 hidden border-t border-[var(--line)] pt-5 text-xs leading-5 text-neutral-500 lg:block">
-          <p>v1.1.0 turns selected concepts into a reusable production Asset Bible before rendering.</p>
+          <p>v1.2.0 turns a current Asset Bible into treatments, scenes, shots, and provider-ready prompt packages.</p>
         </div>
       </aside>
       <div className="min-w-0">{children}</div>
