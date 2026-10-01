@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
 
 const fixtureImage = path.join(process.cwd(), "e2e", "fixtures", "product.png");
@@ -77,9 +77,9 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
 
   await page.goto(`/projects/${projectId}/production`);
   await expect(page.getByRole("heading", { name: "Turn selected concepts into executable shots." })).toBeVisible();
-  await page.getByRole("button", { name: "Build Production Plan" }).click();
+  await clickAndWaitForProduction(page, "Build Production Plan");
 
-  await expect(page.getByRole("heading", { name: "Production Plan" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Production Plan" })).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText("Revision 1", { exact: true })).toBeVisible();
   await expect(page.getByText("Assets r2", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "15s" })).toBeVisible();
@@ -103,8 +103,8 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
     expect.objectContaining({ kind: "production_plan", status: "succeeded" }),
   ]));
 
-  await page.getByRole("button", { name: "Regenerate" }).click();
-  await expect(page.getByText("Revision 2", { exact: true })).toBeVisible();
+  await clickAndWaitForProduction(page, "Regenerate");
+  await expect(page.getByText("Revision 2", { exact: true })).toBeVisible({ timeout: 15_000 });
 
   const projectResponse = await page.request.get(`/api/projects/${projectId}`);
   expect(projectResponse.ok()).toBeTruthy();
@@ -147,3 +147,15 @@ test("demo concept refinement controls remain reachable", async ({ page }) => {
   await page.getByRole("button", { name: "Pro controls" }).click();
   await expect(page.getByText("Creative rationale", { exact: true })).toBeVisible();
 });
+
+
+async function clickAndWaitForProduction(page: Page, buttonName: "Build Production Plan" | "Regenerate") {
+  const responsePromise = page.waitForResponse(
+    (response) => response.url().includes("/api/ai/production") && response.request().method() === "POST",
+    { timeout: 20_000 },
+  );
+  await page.getByRole("button", { name: buttonName }).click();
+  const response = await responsePromise;
+  const body = await response.text();
+  expect(response.ok(), `Production API failed with ${response.status()}: ${body}`).toBeTruthy();
+}
