@@ -1,118 +1,72 @@
-# Commercial Director v1.0.1 — User Manual
+# Commercial Director v1.0.2 — User Manual
 
 ## 1. Start a campaign
-From **Projects**, select **New Campaign**. Add one clear product image. Brand and product names are optional.
+From **Projects**, choose **New Campaign** and add one clear product image. Brand and product names are optional.
 
-Select **Analyze product**. In fixture mode the analysis is deterministic; with the real provider enabled, the uploaded image is analyzed through the configured AI adapter.
+Choose **Analyze product**. Fixture mode is deterministic; real-provider mode analyzes the uploaded image through the configured AI adapter.
 
-When you create the campaign, the source image is stored separately as a browser Blob so it can be shown again without putting large base64 data into localStorage.
+The original image is stored as a browser Blob in IndexedDB so large base64 data is not placed in localStorage.
 
 ## 2. Review Product Intelligence
-Commercial Director extracts product category, materials, colors, form, finish, perceived positioning, and a concise production-oriented summary.
+Review category, materials, colors, form, finish, perceived positioning, and the production-oriented summary.
 
 ### Identity Locks
-Identity Locks mark visible features that downstream creative work must preserve, such as silhouette, cap, label, logo, product color, or material finish. Toggle only features you intentionally want to make flexible.
+Identity Locks mark visible features that downstream creative work should preserve, such as silhouette, cap, label, logo, product color, or material finish. Every lock remains reversible.
 
-Select **Continue to brief**.
+Choose **Continue to brief**.
 
 ## 3. Complete the Creative Brief
-Choose or enter:
+Set brand personality, audience, core benefit, emotional takeaway, mood, occasion/context, and constraints. Then choose **Build campaign**.
 
-- Brand personality
-- Audience
-- Core benefit
-- Emotional takeaway
-- Desired mood
-- Product-specific usage context
-
-A newly created campaign starts with an empty brief rather than inheriting the demo fragrance brief.
-
-Select **Build campaign**. The same request constructs one Campaign Bible, four Creative Territories, and the 20-concept matrix.
+The engine constructs one Campaign Bible, four Creative Territories, and exactly 20 concept slots.
 
 ## 4. Review the Campaign Bible
-The Campaign Bible is the shared source of truth for all concepts. It includes:
+The Campaign Bible is shared campaign context: strategic idea and promise, audience, visual world, hero direction, environments, product behavior, palette, props, camera language, lighting, and sound.
 
-- Strategic idea and promise
-- Audience
-- Visual world
-- Hero direction
-- Environments
-- Product behavior
-- Palette
-
-Select **View full production bible** for props, camera language, lighting, sound, and visual directions to avoid.
-
-The four Creative Territories are shown below the foundation. Select **View 20 concepts** to continue.
+Choose **View 20 concepts** to continue.
 
 ## 5. Review 20 Concept Cards
-Each of the four territories contains one concept in each execution type:
-
+Each territory contains exactly one:
 1. Narrative
 2. Product spectacle
 3. Character
 4. Sensory
 5. Social
 
-Use territory filters to compare ideas. The bookmark control adds or removes a concept from the shortlist and persists in the local project snapshot.
+Use filters to compare territories. Bookmark controls update the shortlist. With PostgreSQL configured, shortlist state is server-persisted; otherwise the browser fallback is used.
 
-## 6. Develop a concept
-Open **Develop** on a card. Concept Detail shows:
+## 6. Develop and refine a concept
+Choose **Develop** on a card to review its hook, core idea, product role, audience takeaway, and 15-second treatment.
 
-- Hook
-- Core idea
-- Product role
-- Audience takeaway
-- 15-second treatment
-
-### Quick refinements
-For a campaign generated from your own brief, refine one slot without regenerating the other 19 concepts:
-
+Quick refinements revise only the selected slot:
 - Make it bolder
 - Make it more luxurious
 - Reduce production complexity
 - Make the product more prominent
 
-The initial concept is preserved before the first revision, and each new revision is appended to local revision history.
+The initial concept and subsequent revisions are preserved. PostgreSQL environments keep this history server-side.
 
 ### Pro Controls
-Enable **Pro controls** for:
+Pro Controls expose creative rationale, camera, lighting, continuity constraints, and required locations/props/VFX.
 
-- Creative rationale
-- Camera language
-- Lighting
-- Continuity constraints
-- Required locations, props, and VFX
+## 7. Persistence modes
+With `DATABASE_URL` configured, PostgreSQL is the runtime source of truth for projects, briefs, campaigns, concepts, shortlist state, revisions, and generation jobs.
 
-Guided and professional users remain in the same project and data model.
+Without `DATABASE_URL`, the typed localStorage fallback keeps the prototype runnable. IndexedDB continues to store the source image Blob.
 
-## 7. Local prototype persistence
-Without a configured server repository, v1.0.0 uses:
+## 8. AI engine behavior
+v1.0.2 retries individual model calls on transient or malformed structured-output failures. The engine validates the 4 × 5 concept matrix locally before model quality review, repairs only affected territories/slots, and never repeats a successful AI generation just because the database commit or job bookkeeping failed.
 
-- localStorage for typed project snapshots, shortlist state, campaign data, and revision history
-- IndexedDB for the original product image Blob
-
-A PostgreSQL/Drizzle schema is included for the production persistence layer, but server repository wiring is not part of this implementation pass.
-
-## 8. What v1.0.0 does not do
-This version does not render final images or videos. It is designed to answer the expensive question first: **which advertising direction is worth producing?**
-
-Later milestones add the asset bible, shotlist/prompt compiler, continuity generation, video rendering, packshot, and cutdowns.
-
+## 9. Current product boundary
+Commercial Director v1.0.2 does not render final images or videos. Its purpose is to determine which advertising directions deserve production.
 
 ## Developer verification
-
-Before treating v1.0.0 as the baseline, install dependencies and Chromium, then run:
 
 ```bash
 npm install
 npm run test:e2e:install
+npm run db:push
 npm run verify
 ```
 
-The baseline is accepted only when typecheck, lint, production build, and the fixture E2E flow all pass.
-
-
-## PostgreSQL runtime (v1.0.1)
-When DATABASE_URL is configured, new projects use server persistence automatically. Product intelligence, briefs, campaign revisions, 20 concepts, shortlist state, concept refinements, and generation status survive browser/device sessions. Without DATABASE_URL the app keeps the local prototype fallback.
-
-For local PostgreSQL development, set DATABASE_URL and run `npm run db:push` before `npm run dev`.
+GitHub Actions runs the same quality gate against PostgreSQL 17.
