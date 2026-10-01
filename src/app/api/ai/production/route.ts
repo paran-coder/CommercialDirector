@@ -33,11 +33,11 @@ export async function POST(request: Request) {
     const serverProject = repository ? await repository.getProject(body.projectId) : null;
 
     if (repository && !serverProject) {
-      return Response.json({ error: "Project not found." }, { status: 404 });
+      return Response.json({ error: "프로젝트를 찾을 수 없습니다." }, { status: 404 });
     }
 
     if (serverProject && !isAssetBibleCurrent(serverProject)) {
-      return Response.json({ error: "Regenerate the Asset Bible from the current Campaign and shortlist before Production Planning." }, { status: 409 });
+      return Response.json({ error: "Production Planning 전에 현재 Campaign과 shortlist 기준으로 Asset Bible을 다시 생성해 주세요." }, { status: 409 });
     }
 
     const product = serverProject?.product ?? body.product;
@@ -53,10 +53,10 @@ export async function POST(request: Request) {
       : body.sourceConceptRevisions;
 
     if (!product || !bible || !territories || !concepts || !assetBible || !sourceCampaignRevision || !sourceAssetBibleRevision) {
-      return Response.json({ error: "Complete a current Asset Bible before Production Planning." }, { status: 409 });
+      return Response.json({ error: "Production Planning 전에 Current 상태의 Asset Bible을 준비해 주세요." }, { status: 409 });
     }
     if (shortlist.length < 1 || shortlist.length > 5) {
-      return Response.json({ error: "Production Planning requires between 1 and 5 shortlisted concepts." }, { status: 409 });
+      return Response.json({ error: "Production Planning에는 1~5개의 shortlisted Concept가 필요합니다." }, { status: 409 });
     }
 
     const generated = await runTrackedGeneration({
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
               !sameSet(current.shortlist, shortlist) ||
               !sameRevisionSnapshot(getConceptRevisionSnapshot(current, shortlist), sourceConceptRevisions)
             ) {
-              throw new Error("Campaign, Asset Bible, or shortlist changed while the Production Plan was being generated. Generate again from the current source.");
+              throw new Error("Production Plan 생성 중 Campaign, Asset Bible, shortlist 또는 Concept revision이 변경되었습니다. 현재 소스에서 다시 생성해 주세요.");
             }
             await repository.saveProductionPlan(body.projectId, {
               productionPlan: result.productionPlan,
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       ...generated.output,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof z.ZodError ? "입력값 형식이 올바르지 않습니다." : error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
     const generationId = error instanceof TrackedGenerationError ? error.generationId : null;
     return Response.json({ error: message, generationId }, { status: error instanceof z.ZodError ? 400 : 500 });
   }
