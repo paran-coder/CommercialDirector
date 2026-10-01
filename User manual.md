@@ -1,4 +1,4 @@
-# Commercial Director v1.2.0 — User Manual (Implementation Plan)
+# Commercial Director v1.2.0 — User Manual
 
 ## 1. Complete Assets first
 Production Planning requires a **current** Asset Bible.
