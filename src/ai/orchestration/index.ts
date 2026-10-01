@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { AIProvider } from "@/ai/provider";
+import { generateObjectWithRetry } from "@/ai/orchestration/generate";
 import {
   CAMPAIGN_BIBLE_INSTRUCTIONS,
   CONCEPT_INSTRUCTIONS,
@@ -13,12 +14,20 @@ import { campaignBibleSchema, territoryBatchSchema, type CampaignBible, type Ter
 import { conceptBatchSchema, conceptSchema, type Concept } from "@/domain/concept/schema";
 import { productIntelligenceSchema, type ProductIntelligence } from "@/domain/product/schema";
 import { demoBible, demoBrief, demoConcepts, demoProduct, demoTerritories } from "@/lib/fixtures/demo";
-import { evaluateConcepts, modelQualityReviewSchema, requiredExecutionTypes, type ModelQualityIssue, type QualityIssue } from "@/ai/orchestration/quality-gate";
+import {
+  conceptSimilarity,
+  evaluateConcepts,
+  modelQualityReviewSchema,
+  requiredExecutionTypes,
+  validateConceptMatrix,
+  type ModelQualityIssue,
+  type QualityIssue,
+} from "@/ai/orchestration/quality-gate";
 
 const conceptReplacementSchema = z.object({ concept: conceptSchema });
 
 export async function analyzeProduct(provider: AIProvider, imageDataUrl?: string): Promise<ProductIntelligence> {
-  return provider.generateObject({
+  return generateObjectWithRetry(provider, {
     name: "product_intelligence",
     schema: productIntelligenceSchema,
     instructions: PRODUCT_ANALYST_INSTRUCTIONS,
@@ -34,7 +43,7 @@ export async function buildCampaign(
   brief: CreativeBrief = demoBrief,
 ) {
   const checkedBrief = creativeBriefSchema.parse(brief);
-  const bible = await provider.generateObject<CampaignBible>({
+  const bible = await generateObjectWithRetry<CampaignBible>(provider, {
     name: "campaign_bible",
     schema: campaignBibleSchema,
     instructions: CAMPAIGN_BIBLE_INSTRUCTIONS,
@@ -42,7 +51,7 @@ export async function buildCampaign(
     fixture: demoBible,
   });
 
-  const territoryResult = await provider.generateObject({
+  const territoryResult = await generateObjectWithRetry(provider, {
     name: "creative_territories",
     schema: territoryBatchSchema,
     instructions: TERRITORY_INSTRUCTIONS,
@@ -53,44 +62,63 @@ export async function buildCampaign(
   const territories = normalizeTerritories(territoryResult.territories);
   let concepts = await generateConceptMatrix(provider, bible, territories);
 
-  // Repair structural issues first. A missing execution type invalidates the whole 5-slot territory batch.
-  const structuralIssues = evaluateConcepts(territories, concepts);
-  const brokenTerritories = new Set(
-    structuralIssues
-      .filter((issue) => issue.reason === "missing_execution_type")
-      .map((issue) => issue.conceptId),
-  );
-
-  if (brokenTerritories.size > 0) {
+  let matrixValidation = validateConceptMatrix(territories, concepts);
+  if (!matrixValidation.valid) {
+    const invalidTerritories = new Set(matrixValidation.invalidTerritoryIds);
     const repairs = await Promise.all(
-      territories.filter((territory) => brokenTerritories.has(territory.id)).map((territory) => generateTerritoryConcepts(provider, bible, territory, true)),
+      territories
+        .filter((territory) => invalidTerritories.has(territory.id))
+        .map((territory) => generateTerritoryConcepts(provider, bible, territory, true)),
     );
+
     for (const repaired of repairs) {
       concepts = concepts.filter((concept) => concept.territoryId !== repaired.territoryId).concat(repaired.concepts);
     }
     concepts = sortConceptMatrix(territories, concepts);
+    matrixValidation = validateConceptMatrix(territories, concepts);
   }
 
-  const heuristicIssues = evaluateConcepts(territories, concepts).filter((issue) => issue.reason !== "missing_execution_type");
-  const modelReview = await provider.generateObject({
+  if (!matrixValidation.valid) {
+    throw new Error(`Concept matrix remained structurally invalid after repair: ${matrixValidation.issues.map((issue) => issue.detail).join(" ")}`);
+  }
+
+  const heuristicIssues = evaluateConcepts(territories, concepts);
+  const modelReview = await generateObjectWithRetry(provider, {
     name: "campaign_quality_review",
     schema: modelQualityReviewSchema,
     instructions: QUALITY_REVIEW_INSTRUCTIONS,
-    prompt: `CAMPAIGN BIBLE\n${JSON.stringify(bible)}\n\nTERRITORIES\n${JSON.stringify(territories)}\n\nCONCEPTS\n${JSON.stringify(concepts)}`,
+    prompt: JSON.stringify(createQualityReviewPayload(bible, territories, concepts, heuristicIssues)),
     fixture: { issues: [] },
   });
 
   const repairTargets = mergeRepairTargets(concepts, heuristicIssues, modelReview.issues).slice(0, 6);
   if (repairTargets.length > 0) {
-    const repaired = await Promise.all(repairTargets.map(({ concept, instruction }) => repairConcept(provider, bible, territories, concepts, concept, instruction)));
+    const repaired = await Promise.all(
+      repairTargets.map(({ concept, instruction }) =>
+        repairConcept(provider, bible, territories, concepts, concept, instruction),
+      ),
+    );
     const repairMap = new Map(repaired.map((concept) => [concept.id, concept]));
     concepts = concepts.map((concept) => repairMap.get(concept.id) ?? concept);
   }
 
-  const finalIssues = evaluateConcepts(territories, concepts);
-  return { bible, territories, concepts, quality: { passed: finalIssues.length === 0, issues: finalIssues } };
-}
+  const finalMatrix = validateConceptMatrix(territories, concepts);
+  if (!finalMatrix.valid) {
+    throw new Error(`Concept repair broke matrix structure: ${finalMatrix.issues.map((issue) => issue.detail).join(" ")}`);
+  }
 
+  const finalIssues = evaluateConcepts(territories, concepts);
+  return {
+    bible,
+    territories,
+    concepts,
+    quality: {
+      passed: finalIssues.length === 0,
+      issues: finalIssues,
+      repairedSlots: repairTargets.map(({ concept }) => concept.id),
+    },
+  };
+}
 
 export async function reviseConcept(
   provider: AIProvider,
@@ -106,23 +134,38 @@ export async function reviseConcept(
 }
 
 async function generateConceptMatrix(provider: AIProvider, bible: CampaignBible, territories: Territory[]) {
-  const batches = await Promise.all(territories.map((territory) => generateTerritoryConcepts(provider, bible, territory, false)));
+  const batches = await Promise.all(
+    territories.map((territory) => generateTerritoryConcepts(provider, bible, territory, false)),
+  );
   return sortConceptMatrix(territories, batches.flatMap((batch) => batch.concepts));
 }
 
-async function generateTerritoryConcepts(provider: AIProvider, bible: CampaignBible, territory: Territory, repair: boolean) {
+async function generateTerritoryConcepts(
+  provider: AIProvider,
+  bible: CampaignBible,
+  territory: Territory,
+  repair: boolean,
+) {
   const fixtureConcepts = demoConcepts.filter((concept) => concept.territoryId === territory.id);
-  const result = await provider.generateObject({
+  const result = await generateObjectWithRetry(provider, {
     name: `${repair ? "repair" : "concepts"}_${territory.id}`,
     schema: conceptBatchSchema,
     instructions: CONCEPT_INSTRUCTIONS,
     prompt: `CAMPAIGN BIBLE\n${JSON.stringify(bible)}\n\nTERRITORY\n${JSON.stringify(territory)}\n\nCreate exactly five concepts, one per execution type: ${requiredExecutionTypes.join(", ")}. ${repair ? "This is a structural repair pass; make every slot distinct and complete." : ""}`,
-    fixture: { concepts: fixtureConcepts.length === 5 ? fixtureConcepts : demoConcepts.slice(0, 5).map((concept) => ({ ...concept, territoryId: territory.id })) },
+    fixture: {
+      concepts: fixtureConcepts.length === 5
+        ? fixtureConcepts
+        : demoConcepts.slice(0, 5).map((concept) => ({ ...concept, territoryId: territory.id })),
+    },
   });
 
   return {
     territoryId: territory.id,
-    concepts: result.concepts.map((concept, index) => ({ ...concept, id: `${territory.id}-${index + 1}`, territoryId: territory.id })),
+    concepts: result.concepts.map((concept) => ({
+      ...concept,
+      id: canonicalConceptId(territory.id, concept.executionType),
+      territoryId: territory.id,
+    })),
   };
 }
 
@@ -137,15 +180,73 @@ async function repairConcept(
 ) {
   const territory = territories.find((item) => item.id === concept.territoryId);
   if (!territory) return concept;
-  const peers = allConcepts.filter((item) => item.id !== concept.id).map(({ id, territoryId, executionType, title, hook }) => ({ id, territoryId, executionType, title, hook }));
-  const result = await provider.generateObject({
+
+  const result = await generateObjectWithRetry(provider, {
     name: `repair_${concept.id}`,
     schema: conceptReplacementSchema,
     instructions: CONCEPT_REPAIR_INSTRUCTIONS,
-    prompt: `CAMPAIGN BIBLE\n${JSON.stringify(bible)}\n\nTERRITORY\n${JSON.stringify(territory)}\n\nREQUIRED EXECUTION TYPE\n${concept.executionType}\n\nREPAIR REQUEST\n${instruction}\n\nOTHER CONCEPTS TO AVOID DUPLICATING\n${JSON.stringify(peers)}\n\nReplace only this concept slot. Keep the exact concept id ${concept.id} and territory id ${concept.territoryId}.`,
+    prompt: `CAMPAIGN CONTEXT\n${JSON.stringify(createRepairCampaignContext(bible))}\n\nTERRITORY\n${JSON.stringify(territory)}\n\nREQUIRED EXECUTION TYPE\n${concept.executionType}\n\nREPAIR REQUEST\n${instruction}\n\nRELEVANT PEERS TO AVOID DUPLICATING\n${JSON.stringify(selectRepairPeers(concept, allConcepts))}\n\nReplace only this concept slot. Keep the exact concept id ${concept.id} and territory id ${concept.territoryId}.`,
     fixture: { concept: fixtureOverride ?? concept },
   });
-  return { ...result.concept, id: concept.id, territoryId: concept.territoryId, executionType: concept.executionType };
+
+  return {
+    ...result.concept,
+    id: concept.id,
+    territoryId: concept.territoryId,
+    executionType: concept.executionType,
+  };
+}
+
+function createQualityReviewPayload(
+  bible: CampaignBible,
+  territories: Territory[],
+  concepts: Concept[],
+  heuristicIssues: QualityIssue[],
+) {
+  return {
+    campaign: createRepairCampaignContext(bible),
+    territories: territories.map(({ id, title, premise, description }) => ({ id, title, premise, description })),
+    concepts: concepts.map((concept) => ({
+      id: concept.id,
+      territoryId: concept.territoryId,
+      executionType: concept.executionType,
+      title: concept.title,
+      hook: concept.hook,
+      idea: concept.idea,
+      productRole: concept.productRole,
+      audienceTakeaway: concept.audienceTakeaway,
+      primaryDuration: concept.primaryDuration,
+      requirements: concept.requirements,
+    })),
+    heuristicIssues,
+  };
+}
+
+function createRepairCampaignContext(bible: CampaignBible) {
+  return {
+    campaignName: bible.campaignName,
+    campaignIdea: bible.campaignIdea,
+    audienceSummary: bible.audienceSummary,
+    visualWorld: bible.visualWorld,
+    productBehavior: bible.productBehavior,
+    cameraLanguage: bible.cameraLanguage,
+    lighting: bible.lighting,
+    palette: bible.palette,
+  };
+}
+
+function selectRepairPeers(concept: Concept, allConcepts: Concept[], limit = 8) {
+  const sameTerritory = allConcepts
+    .filter((item) => item.id !== concept.id && item.territoryId === concept.territoryId);
+
+  const sameIds = new Set(sameTerritory.map((item) => item.id));
+  const similarElsewhere = allConcepts
+    .filter((item) => item.id !== concept.id && !sameIds.has(item.id))
+    .sort((a, b) => conceptSimilarity(concept, b) - conceptSimilarity(concept, a));
+
+  return [...sameTerritory, ...similarElsewhere]
+    .slice(0, Math.max(1, limit))
+    .map(({ id, territoryId, executionType, title, hook }) => ({ id, territoryId, executionType, title, hook }));
 }
 
 function mergeRepairTargets(concepts: Concept[], heuristic: QualityIssue[], model: ModelQualityIssue[]) {
@@ -164,7 +265,7 @@ function mergeRepairTargets(concepts: Concept[], heuristic: QualityIssue[], mode
   }
   return Array.from(instructions.entries()).map(([id, reasons]) => ({
     concept: concepts.find((concept) => concept.id === id)!,
-    instruction: reasons.join(" "),
+    instruction: Array.from(new Set(reasons)).join(" "),
   }));
 }
 
@@ -188,6 +289,10 @@ function sortConceptMatrix(territories: Territory[], concepts: Concept[]) {
     if (territoryDelta !== 0) return territoryDelta;
     return (typeOrder.get(a.executionType) ?? 99) - (typeOrder.get(b.executionType) ?? 99);
   });
+}
+
+function canonicalConceptId(territoryId: string, executionType: Concept["executionType"]) {
+  return `${territoryId}-${executionType.replaceAll("_", "-")}`;
 }
 
 function slugify(value: string) {
