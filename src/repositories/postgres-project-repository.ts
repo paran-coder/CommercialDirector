@@ -2,6 +2,7 @@ import { and, asc, desc, eq, inArray, max } from "drizzle-orm";
 import type { AppDatabase } from "@/db/client";
 import {
   assetBibleRevisions,
+  productionPlanRevisions,
   campaignBibleRevisions,
   conceptRevisions,
   concepts,
@@ -18,6 +19,7 @@ import { conceptSchema } from "@/domain/concept/schema";
 import { productIntelligenceSchema } from "@/domain/product/schema";
 import {
   assetBibleRevisionSchema,
+  productionPlanRevisionSchema,
   campaignRevisionDataSchema,
   localProjectSnapshotSchema,
   type ProjectRuntimePatch,
@@ -25,8 +27,10 @@ import {
 } from "@/domain/project/schema";
 import { territorySchema } from "@/domain/campaign/schema";
 import { assetBibleSchema } from "@/domain/assets/schema";
+import { productionPlanSchema } from "@/domain/production/schema";
 import type {
   AssetBibleSaveInput,
+  ProductionPlanSaveInput,
   CampaignSaveInput,
   GenerationJobRecord,
   ProjectRepository,
@@ -65,11 +69,12 @@ export class PostgresProjectRepository implements ProjectRepository {
     const [project] = await this.db.select().from(projects).where(eq(projects.id, id)).limit(1);
     if (!project) return null;
 
-    const [productRows, briefRows, campaignRows, assetBibleRows, territoryRows, conceptRows, shortlistRows] = await Promise.all([
+    const [productRows, briefRows, campaignRows, assetBibleRows, productionPlanRows, territoryRows, conceptRows, shortlistRows] = await Promise.all([
       this.db.select().from(products).where(eq(products.projectId, id)).limit(1),
       this.db.select().from(creativeBriefs).where(eq(creativeBriefs.projectId, id)).limit(1),
       this.db.select().from(campaignBibleRevisions).where(eq(campaignBibleRevisions.projectId, id)).orderBy(asc(campaignBibleRevisions.revision)),
       this.db.select().from(assetBibleRevisions).where(eq(assetBibleRevisions.projectId, id)).orderBy(asc(assetBibleRevisions.revision)),
+      this.db.select().from(productionPlanRevisions).where(eq(productionPlanRevisions.projectId, id)).orderBy(asc(productionPlanRevisions.revision)),
       this.db.select().from(territories).where(eq(territories.projectId, id)).orderBy(asc(territories.slot)),
       this.db.select().from(concepts).where(eq(concepts.projectId, id)).orderBy(asc(concepts.stableKey)),
       this.db.select().from(shortlist).where(eq(shortlist.projectId, id)),
@@ -109,6 +114,16 @@ export class PostgresProjectRepository implements ProjectRepository {
     }));
     const latestAssetBible = parsedAssetBibleRevisions.at(-1);
 
+    const parsedProductionPlanRevisions = productionPlanRows.map((row) => productionPlanRevisionSchema.parse({
+      revision: row.revision,
+      sourceCampaignRevision: row.sourceCampaignRevision,
+      sourceAssetBibleRevision: row.sourceAssetBibleRevision,
+      sourceConceptKeys: row.sourceConceptKeys,
+      data: productionPlanSchema.parse(row.data),
+      createdAt: row.createdAt.toISOString(),
+    }));
+    const latestProductionPlan = parsedProductionPlanRevisions.at(-1);
+
     const shortlistStableKeys = shortlistRows
       .map((row) => stableKeyByUuid.get(row.conceptId))
       .filter((key): key is string => Boolean(key));
@@ -138,6 +153,8 @@ export class PostgresProjectRepository implements ProjectRepository {
       conceptRevisions: parsedConceptRevisions,
       assetBible: latestAssetBible?.data,
       assetBibleRevisions: parsedAssetBibleRevisions,
+      productionPlan: latestProductionPlan?.data,
+      productionPlanRevisions: parsedProductionPlanRevisions,
     });
   }
 
@@ -268,6 +285,29 @@ export class PostgresProjectRepository implements ProjectRepository {
 
     const snapshot = await this.getProject(id);
     if (!snapshot) throw new Error("Asset Bible was saved but project could not be loaded.");
+    return snapshot;
+  }
+
+  async saveProductionPlan(id: string, input: ProductionPlanSaveInput) {
+    await this.db.transaction(async (tx) => {
+      const [revisionRow] = await tx.select({ revision: max(productionPlanRevisions.revision) })
+        .from(productionPlanRevisions)
+        .where(eq(productionPlanRevisions.projectId, id));
+      const nextRevision = (revisionRow?.revision ?? 0) + 1;
+
+      await tx.insert(productionPlanRevisions).values({
+        projectId: id,
+        revision: nextRevision,
+        sourceCampaignRevision: input.sourceCampaignRevision,
+        sourceAssetBibleRevision: input.sourceAssetBibleRevision,
+        sourceConceptKeys: [...new Set(input.sourceConceptKeys)],
+        data: input.productionPlan,
+      });
+      await tx.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, id));
+    });
+
+    const snapshot = await this.getProject(id);
+    if (!snapshot) throw new Error("Production Plan was saved but project could not be loaded.");
     return snapshot;
   }
 
