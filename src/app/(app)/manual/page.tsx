@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, CheckCircle2, CircleAlert } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "사용자 매뉴얼 | Commercial Director",
+  title: "사용자 매뉴얼",
   description: "Commercial Director의 전체 캠페인 제작 흐름과 Asset Bible, Production Plan 사용법을 설명합니다.",
 };
 
