@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { assetBibleSchema, type AssetBible } from "@/domain/assets/schema";
+import { assetBibleSchema } from "@/domain/assets/schema";
 import {
   isAssetBibleCurrent,
   type ProjectSnapshot,
