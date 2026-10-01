@@ -6,64 +6,60 @@ Commercial Director is a creative decision system that turns one product image i
 
 `Product Image → Product Intelligence → Identity Locks → Creative Brief → Campaign Bible → 4 Territories → 20 Concepts → Shortlist → Concept Detail → Slot-level Refinement`
 
-v1.0.0 deliberately ends before image/video rendering. It validates the creative strategy and decision layer first.
-
-## Audience
-
-The application serves brand/marketing users and creative/production professionals in one UI. Professional detail is revealed progressively through Pro Controls instead of maintaining separate products.
+The current product intentionally ends before final image/video rendering. It validates the creative strategy and decision layer first.
 
 ## Architecture
 
-- Next.js 16 App Router
-- TypeScript
+- Next.js 16 App Router + TypeScript + React 19
 - Tailwind CSS
-- PostgreSQL + Drizzle ORM schema for server persistence
-- Zod domain schemas
+- PostgreSQL 17 + Drizzle ORM
+- Zod domain contracts
 - Provider-agnostic AI orchestration
-- Deterministic fixture provider for local development
-- OpenAI Responses API adapter for real structured generation
-- PostgreSQL runtime repository as the source of truth when DATABASE_URL is configured
-- Browser project snapshot cache/fallback for DB-free prototyping
-- IndexedDB blob storage for the uploaded source product image
+- Deterministic fixture provider
+- OpenAI Responses API adapter with Structured Outputs
+- PostgreSQL runtime repository as source of truth when `DATABASE_URL` is configured
+- localStorage cache/fallback for DB-free development
+- IndexedDB Blob storage for the original product image
 
-## AI generation model
-
-The creative engine uses a controlled orchestration workflow rather than autonomous agents chatting with one another:
+## AI generation pipeline
 
 1. Product Analyst
-2. Structured Creative Brief
-3. Campaign Strategist / Art Director
-4. Territory Generator
-5. Four independent Concept Generator jobs, one per territory
-6. Heuristic + model Quality Gate
-7. Slot-level repair for weak or overlapping concepts
+2. Campaign Strategist / Art Director
+3. Territory Generator
+4. Four parallel territory concept batches
+5. Deterministic 4 × 5 matrix validation
+6. Compact model-level quality review
+7. Targeted slot repair
 
-v1.0.2 keeps this architecture but makes it cheaper and safer: individual model calls have bounded retries, structural validation is deterministic, quality-review payloads are compact, repair context is limited to relevant peers, and persistence failures cannot cause a successful generation to run again.
+Each territory owns exactly one Narrative, Product Spectacle, Character, Sensory, and Social slot.
 
-Every territory owns five execution slots: Narrative, Product Spectacle, Character, Sensory, and Social. This yields exactly 20 concepts.
+### v1.0.2 engine changes
 
-## Concept refinement
+- Individual model calls retry once on transient/structured-output failures.
+- The 4 × 5 matrix is validated locally before model-level review.
+- Generated concept IDs are canonical: `<territory>-<execution-type>`.
+- Quality review omits treatment/pro-detail payload that is not needed for set-level review.
+- Slot repair receives same-territory peers plus only the most relevant cross-territory peers.
+- A successful AI result is never regenerated solely because persistence commit or job bookkeeping fails.
+- Provider-neutral reasoning hints map to OpenAI reasoning effort: strategy/quality tasks use `medium`; high-volume concept generation and repair use `low`.
 
-Concept Detail supports targeted revision without regenerating the remaining 19 concepts. The first refinement controls are:
+## Persistence
 
-- Make it bolder
-- Make it more luxurious
-- Reduce production complexity
-- Make the product more prominent
+When `DATABASE_URL` is configured, project creation, product/brief updates, campaign revisions, territories, concepts, shortlist state, concept revisions, and generation jobs are persisted in PostgreSQL. Campaign saves are transactional.
 
-Local prototype revisions retain the initial concept and every subsequent revision in project history.
+Without a database, the browser fallback remains available for local fixture development.
 
 ## Environment
 
 Copy `.env.example` to `.env.local`.
 
-Fixture mode requires no external AI service:
+Fixture mode:
 
 ```bash
 AI_PROVIDER=fixture
 ```
 
-Real AI mode:
+Real provider mode:
 
 ```bash
 AI_PROVIDER=openai
@@ -71,7 +67,12 @@ OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-5.6-terra
 ```
 
-`DATABASE_URL` enables the PostgreSQL runtime repository. Project creation, product/brief updates, campaign saves, concept revisions, shortlist state, and generation jobs are persisted transactionally. Without a database, the browser fallback remains available for fixture/local development.
+For PostgreSQL runtime:
+
+```bash
+DATABASE_URL=postgresql://...
+npm run db:push
+```
 
 ## Development
 
@@ -80,36 +81,18 @@ npm install
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Open `http://localhost:3000`.
 
-## Quality commands
+## Quality gate
 
 ```bash
 npm run typecheck
 npm run lint
 npm run build
-npm run test:e2e:install   # once per machine
 npm run test:e2e
-
-# full baseline gate
-npm run verify
 ```
 
-## Validation status
-
-GitHub Actions validates every dev/main push against a real PostgreSQL 17 service:
-
-- Drizzle schema push
-- TypeScript typecheck
-- ESLint
-- Next.js production build
-- Playwright core-flow E2E
-- DB-backed project creation and hydration
-- Campaign and concept generation job persistence
-- Concept revision persistence
-- Shortlist persistence
-
-The v1.0.1 PostgreSQL runtime gate is passing. v1.0.2 is optimizing the AI orchestration layer without changing the product flow.
+GitHub Actions additionally provisions PostgreSQL 17 and applies the Drizzle schema before running the gate. Playwright covers the DB-backed product → brief → campaign → 20 concepts → shortlist → concept refinement flow plus deterministic AI-engine tests for matrix structure, bounded model-call retry, and no-regeneration-on-persistence-failure behavior.
 
 ## Version
 
