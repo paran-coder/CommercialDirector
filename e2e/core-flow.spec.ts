@@ -132,7 +132,7 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
 
   await page.reload();
   await expect(page.getByRole("heading", { name: "Asset Bible을 먼저 최신 상태로 맞춰 주세요." })).toBeVisible();
-  await page.getByRole("link", { name: "재생성 Asset Bible" }).click();
+  await page.getByRole("link", { name: "Asset Bible 재생성" }).click();
 
   await expect(page.getByText("Out of date · 재생성 필요", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "재생성" }).click();
