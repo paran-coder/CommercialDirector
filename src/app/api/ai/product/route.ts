@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const product = await analyzeProduct(provider, body.imageDataUrl);
     return Response.json({ provider: provider.id, product });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof z.ZodError ? "입력값 형식이 올바르지 않습니다." : error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
     return Response.json({ error: message }, { status: 400 });
   }
 }

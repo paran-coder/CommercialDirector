@@ -39,15 +39,15 @@ export function ConceptGrid({ projectId, concepts: fallbackConcepts, territories
     void setRuntimeShortlist(projectId, Array.from(next));
   }
 
-  if (!loaded) return <div className="page-wrap"><p className="text-sm text-neutral-500">Loading concepts…</p></div>;
-  if (!ready) return <div className="page-wrap max-w-3xl"><p className="eyebrow">Campaign concepts</p><h1 className="mt-4 text-4xl font-medium tracking-[-0.04em]">No concepts yet.</h1><p className="mt-4 max-w-xl text-sm leading-6 text-neutral-500">Complete the creative brief and build the campaign to generate the four-territory, 20-concept matrix.</p><Link className="mt-7 inline-flex h-10 items-center rounded-md bg-neutral-950 px-4 text-sm font-medium text-white" href={`/projects/${projectId}/brief`}>Build campaign</Link></div>;
+  if (!loaded) return <div className="page-wrap"><p className="text-sm text-neutral-500">Concept를 불러오는 중…</p></div>;
+  if (!ready) return <div className="page-wrap max-w-3xl"><p className="eyebrow">Campaign Concepts</p><h1 className="mt-4 text-4xl font-medium tracking-[-0.04em]">아직 Concept가 없습니다.</h1><p className="mt-4 max-w-xl text-sm leading-6 text-neutral-500">Creative Brief를 완성하고 캠페인을 만들면 4개 Territory × 5개 실행 방식으로 20개 Concept를 생성합니다.</p><Link className="mt-7 inline-flex h-10 items-center rounded-md bg-neutral-950 px-4 text-sm font-medium text-white" href={`/projects/${projectId}/brief`}>캠페인 만들기</Link></div>;
 
   return (
     <div className="page-wrap">
-      <div className="section-heading"><div><p className="eyebrow">Campaign concepts · {concepts.length}</p><h1>Four territories. Five ways in.</h1></div><p>The matrix prevents a pile of near-duplicate ideas. Shortlist what deserves production development.</p></div>
+      <div className="section-heading"><div><p className="eyebrow">Campaign Concepts · {concepts.length}</p><h1>4개 Territory, 5가지 실행 방식.</h1></div><p>비슷한 아이디어 20개가 아니라 서로 다른 방향을 강제로 확보하는 구조입니다. 실제 제작으로 발전시킬 Concept를 shortlist해 주세요.</p></div>
       <div className="mt-8 flex flex-wrap items-center gap-2 border-b border-[var(--line)] pb-5">
-        <Filter active={territory === "all"} onClick={() => setTerritory("all")}>All</Filter>{territories.map((item) => <Filter key={item.id} active={territory === item.id} onClick={() => setTerritory(item.id)}>{item.title}</Filter>)}
-        <span className="ml-auto text-xs text-neutral-500">{shortlist.size} shortlisted</span>
+        <Filter active={territory === "all"} onClick={() => setTerritory("all")}>전체</Filter>{territories.map((item) => <Filter key={item.id} active={territory === item.id} onClick={() => setTerritory(item.id)}>{item.title}</Filter>)}
+        <span className="ml-auto text-xs text-neutral-500">shortlist {shortlist.size}개</span>
       </div>
       <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {visible.map((concept) => {
@@ -55,9 +55,9 @@ export function ConceptGrid({ projectId, concepts: fallbackConcepts, territories
           if (!itemTerritory) return null;
           const saved = shortlist.has(concept.id);
           return <article key={concept.id} data-testid="concept-card" className="group flex min-h-[270px] flex-col rounded-xl border border-[var(--line)] bg-white p-5 transition hover:-translate-y-0.5 hover:border-neutral-400 motion-reduce:transform-none motion-reduce:transition-none">
-            <div className="flex items-start justify-between"><span className="text-xs tabular-nums text-neutral-400">{String(indexById.get(concept.id) ?? 0).padStart(2,"0")}</span><button onClick={() => toggle(concept.id)} aria-label="Toggle shortlist" className={cx("grid size-8 place-items-center rounded-md border transition", saved ? "border-neutral-950 bg-neutral-950 text-white" : "border-[var(--line)] text-neutral-400 hover:text-neutral-950")}><Bookmark size={14} fill={saved ? "currentColor" : "none"}/></button></div>
+            <div className="flex items-start justify-between"><span className="text-xs tabular-nums text-neutral-400">{String(indexById.get(concept.id) ?? 0).padStart(2,"0")}</span><button onClick={() => toggle(concept.id)} aria-label="shortlist 선택 전환" className={cx("grid size-8 place-items-center rounded-md border transition", saved ? "border-neutral-950 bg-neutral-950 text-white" : "border-[var(--line)] text-neutral-400 hover:text-neutral-950")}><Bookmark size={14} fill={saved ? "currentColor" : "none"}/></button></div>
             <div className="mt-8"><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-neutral-400">{itemTerritory.title} · {executionLabel(concept.executionType)}</p><h2 className="mt-3 text-xl font-medium tracking-[-0.02em]">{concept.title}</h2><p className="mt-3 text-sm leading-6 text-neutral-500">{concept.hook}</p></div>
-            <div className="mt-auto flex items-center justify-between pt-7"><span className="text-xs text-neutral-400">{concept.primaryDuration}s concept</span><Link className="inline-flex items-center gap-1 text-xs font-medium" href={`/projects/${projectId}/concepts/${concept.id}`}>Develop <ArrowUpRight size={13}/></Link></div>
+            <div className="mt-auto flex items-center justify-between pt-7"><span className="text-xs text-neutral-400">{concept.primaryDuration}초 Concept</span><Link className="inline-flex items-center gap-1 text-xs font-medium" href={`/projects/${projectId}/concepts/${concept.id}`}>자세히 보기 <ArrowUpRight size={13}/></Link></div>
           </article>;
         })}
       </div>

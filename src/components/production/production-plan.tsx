@@ -41,7 +41,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
       })
       .catch((caught) => {
         if (!cancelled) {
-          setError(caught instanceof Error ? caught.message : "Project loading failed.");
+          setError(caught instanceof Error ? caught.message : "프로젝트를 불러오지 못했습니다.");
           setLoaded(true);
         }
       });
@@ -89,7 +89,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
         }),
       });
       const body = await response.json();
-      if (!response.ok) throw new Error(body.error ?? "Production Plan generation failed.");
+      if (!response.ok) throw new Error(body.error ?? "Production Plan 생성에 실패했습니다.");
 
       const productionPlan = productionPlanSchema.parse(body.productionPlan);
       if (body.persisted) {
@@ -128,40 +128,40 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
       }
       setConceptKey(productionPlan.concepts[0]?.conceptKey ?? null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Production Plan generation failed.");
+      setError(caught instanceof Error ? caught.message : "Production Plan 생성에 실패했습니다.");
     } finally {
       setGenerating(false);
     }
   }
 
   if (!loaded) {
-    return <div className="page-wrap"><p className="text-sm text-neutral-500">Loading production plan…</p></div>;
+    return <div className="page-wrap"><p className="text-sm text-neutral-500">Production Plan을 불러오는 중…</p></div>;
   }
 
   if (!project) {
     return <Prerequisite
-      title="Project not found."
-      body="Open an existing campaign project before Production Planning."
+      title="프로젝트를 찾을 수 없습니다."
+      body="Production Planning을 시작하려면 기존 캠페인 프로젝트를 열어 주세요."
       href="/projects"
-      action="Back to projects"
+      action="프로젝트 목록으로"
     />;
   }
 
   if (!project.assetBible || !project.assetBibleRevisions.length) {
     return <Prerequisite
-      title="Build the Asset Bible first."
-      body="Production Planning requires approved Product, Hero, Wardrobe, Location, and Prop continuity before scenes and shots are created."
+      title="먼저 Asset Bible을 만들어 주세요."
+      body="Scene과 Shot을 만들기 전에 Product, Hero, Wardrobe, Location, Prop의 continuity가 Asset Bible에 확정되어 있어야 합니다."
       href={`/projects/${projectId}/assets`}
-      action="Open Assets"
+      action="Asset Bible 열기"
     />;
   }
 
   if (!isAssetBibleCurrent(project)) {
     return <Prerequisite
-      title="Refresh the Asset Bible first."
-      body="The Campaign Bible or shortlist changed after the current Asset Bible was generated. Production Planning only runs from a current production source."
+      title="Asset Bible을 먼저 최신 상태로 맞춰 주세요."
+      body="현재 Asset Bible을 만든 뒤 Campaign Bible 또는 shortlist가 변경되었습니다. Production Planning은 Current 상태의 제작 소스에서만 진행합니다."
       href={`/projects/${projectId}/assets`}
-      action="Regenerate Asset Bible"
+      action="Asset Bible 재생성"
     />;
   }
 
@@ -171,10 +171,10 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
   if (!plan || !latest) {
     return (
       <div className="page-wrap max-w-5xl">
-        <p className="eyebrow">Production planning</p>
-        <h1 className="mt-4 max-w-4xl text-4xl font-medium tracking-[-0.04em] sm:text-6xl">Turn selected concepts into executable shots.</h1>
+        <p className="eyebrow">Production Planning · 제작 설계</p>
+        <h1 className="mt-4 max-w-4xl text-4xl font-medium tracking-[-0.04em] sm:text-6xl">선택한 Concept를 실제 촬영 가능한 Shot으로 바꿉니다.</h1>
         <p className="mt-5 max-w-2xl text-sm leading-6 text-neutral-500">
-          Build 15s, 30s, and 45s treatments, scene graphs, shotlists, and model-neutral prompt packages from the current Asset Bible.
+          현재 Asset Bible을 기준으로 15초·30초·45초 Treatment, Scene Graph, Shotlist, 모델 중립 Prompt 패키지를 만듭니다.
         </p>
         <div className="mt-7 flex flex-wrap gap-2">
           {project.shortlist.map((key) => {
@@ -184,7 +184,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
         </div>
         <Button className="mt-8 gap-2" onClick={generate} disabled={generating}>
           {generating ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none"/> : null}
-          {generating ? "Building Production Plan…" : "Build Production Plan"}
+          {generating ? "Production Plan 생성 중…" : "Production Plan 만들기"}
         </Button>
         {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
       </div>
@@ -197,10 +197,10 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
     <div className="page-wrap max-w-7xl">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Director document</p>
+          <p className="eyebrow">Director Document · 제작 문서</p>
           <h1>Production Plan</h1>
         </div>
-        <p>One structured source for timing, scenes, shots, and provider-ready prompt text. Canonical Asset Bible references remain authoritative throughout.</p>
+        <p>타이밍, Scene, Shot, provider용 prompt를 하나의 구조화된 제작 문서로 관리합니다. 모든 제작 정보는 canonical Asset Bible reference를 기준으로 합니다.</p>
       </div>
 
       <section className="mt-7 flex flex-col gap-5 border-b border-neutral-950 pb-7 lg:flex-row lg:items-end lg:justify-between">
@@ -208,27 +208,27 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
           <span className="tag">Revision {latest.revision}</span>
           <span className="tag">Campaign r{latest.sourceCampaignRevision}</span>
           <span className="tag">Assets r{latest.sourceAssetBibleRevision}</span>
-          <span className="tag">{latest.sourceConceptKeys.length} concepts</span>
+          <span className="tag">Concept {latest.sourceConceptKeys.length}개</span>
           <span className={current ? "tag border-neutral-950 text-neutral-950" : "tag border-amber-400 bg-amber-50 text-amber-800"}>
-            {current ? "Current" : "Out of date"}
+            {current ? "Current · 최신" : "Out of date · 재생성 필요"}
           </span>
         </div>
         <Button className="gap-2" onClick={generate} disabled={generating}>
           {generating ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none"/> : <RefreshCw size={14}/>}
-          {generating ? "Regenerating…" : "Regenerate"}
+          {generating ? "재생성 중…" : "재생성"}
         </Button>
       </section>
 
       {!current ? (
         <div className="mt-6 border-l-2 border-amber-500 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900">
-          The Campaign, Asset Bible, or shortlist changed after this Production Plan was generated. This revision remains preserved for reference.
+          이 Production Plan 생성 후 Campaign, Asset Bible, shortlist 또는 Concept revision이 변경되었습니다. 이 revision은 기록으로 보존되며 현재 기준으로 다시 생성해야 합니다.
         </div>
       ) : null}
       {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-6 lg:self-start">
-          <p className="meta">Selected concept</p>
+          <p className="meta">선택한 Concept</p>
           <div className="mt-3 flex gap-2 overflow-x-auto lg:flex-col">
             {plan.concepts.map((concept) => (
               <button
@@ -243,7 +243,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
             ))}
           </div>
 
-          <p className="meta mt-7">Duration</p>
+          <p className="meta mt-7">영상 길이</p>
           <div className="mt-3 grid grid-cols-3 gap-2">
             {durations.map((value) => (
               <button
@@ -262,7 +262,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
             onClick={() => setProOpen((value) => !value)}
             className="mt-7 flex w-full items-center justify-between border-t border-[var(--line)] pt-4 text-sm font-medium"
           >
-            Pro controls
+            Pro Controls
             {proOpen ? <ChevronDown size={15}/> : <ChevronRight size={15}/>}
           </button>
         </aside>
@@ -288,10 +288,10 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
           <section className="mt-12 border-t border-neutral-950 pt-7">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="eyebrow">Scene graph + shotlist</p>
-                <h2 className="mt-3 text-2xl font-medium tracking-[-0.025em]">{activeVariant.scenes.length} scenes · {activeVariant.shots.length} shots</h2>
+                <p className="eyebrow">Scene Graph + Shotlist</p>
+                <h2 className="mt-3 text-2xl font-medium tracking-[-0.025em]">Scene {activeVariant.scenes.length}개 · Shot {activeVariant.shots.length}개</h2>
               </div>
-              <p className="text-xs text-neutral-400">{activeVariant.shots.at(-1)?.end.toFixed(2)}s total</p>
+              <p className="text-xs text-neutral-400">{activeVariant.shots.at(-1)?.end.toFixed(2)}초 합계</p>
             </div>
 
             <div className="mt-6 space-y-4">
@@ -319,9 +319,9 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
                     {open ? (
                       <div className="border-t border-[var(--line)]">
                         <div className="grid gap-px bg-[var(--line)] md:grid-cols-3">
-                          <InfoCell label="Action" value={scene.action}/>
-                          <InfoCell label="Product role" value={scene.productRole}/>
-                          <InfoCell label="Assets" value={scene.assetRefs.join(" · ")}/>
+                          <InfoCell label="동작/상황" value={scene.action}/>
+                          <InfoCell label="제품 역할" value={scene.productRole}/>
+                          <InfoCell label="사용 Asset" value={scene.assetRefs.join(" · ")}/>
                         </div>
                         <div className="divide-y divide-[var(--line)]">
                           {sceneShots.map((shot) => (
@@ -331,12 +331,12 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
                                 <p className="mt-2 text-xs font-medium">{shot.start.toFixed(2)}–{shot.end.toFixed(2)}s</p>
                               </div>
                               <div>
-                                <p className="meta">Frame / action</p>
+                                <p className="meta">프레이밍 / 동작</p>
                                 <p className="mt-2 text-sm leading-6">{shot.framing}</p>
                                 <p className="mt-2 text-sm leading-6 text-neutral-500">{shot.subjectAction}</p>
                               </div>
                               <div>
-                                <p className="meta">Camera / light</p>
+                                <p className="meta">카메라 / 조명</p>
                                 <p className="mt-2 text-sm leading-6 text-neutral-600">{shot.lensIntent}; {shot.cameraMovement}</p>
                                 <p className="mt-2 text-xs leading-5 text-neutral-500">{shot.lightingIntent}</p>
                               </div>
@@ -360,8 +360,8 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
             <section className="mt-12 border-t border-neutral-950 pt-7">
               <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="eyebrow">Prompt compiler</p>
-                  <h2 className="mt-3 text-2xl font-medium tracking-[-0.025em]">Model-neutral source → provider text</h2>
+                  <p className="eyebrow">Prompt Compiler</p>
+                  <h2 className="mt-3 text-2xl font-medium tracking-[-0.025em]">모델 중립 Prompt IR → provider용 prompt</h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(["generic", "seedance", "kling", "veo"] as const).map((item) => (
@@ -390,16 +390,16 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
                         <div>
                           <p className="meta">Prompt IR</p>
                           <dl className="mt-3 space-y-2 text-xs leading-5 text-neutral-600">
-                            <div><dt className="font-medium text-neutral-950">Subject</dt><dd>{ir.subject}</dd></div>
-                            <div><dt className="font-medium text-neutral-950">Action</dt><dd>{ir.action}</dd></div>
-                            <div><dt className="font-medium text-neutral-950">Environment</dt><dd>{ir.environment}</dd></div>
+                            <div><dt className="font-medium text-neutral-950">피사체</dt><dd>{ir.subject}</dd></div>
+                            <div><dt className="font-medium text-neutral-950">동작</dt><dd>{ir.action}</dd></div>
+                            <div><dt className="font-medium text-neutral-950">환경</dt><dd>{ir.environment}</dd></div>
                             <div><dt className="font-medium text-neutral-950">Asset refs</dt><dd>{ir.assetRefs.join(" · ")}</dd></div>
                           </dl>
                         </div>
                         <div>
-                          <p className="meta">Compiled prompt</p>
+                          <p className="meta">Compiled prompt · 실제 provider용 영문 prompt</p>
                           <pre className="mt-3 whitespace-pre-wrap rounded-lg border border-[var(--line)] bg-neutral-50 p-4 text-xs leading-5 text-neutral-700">{compiled?.prompt}</pre>
-                          <p className="meta mt-4">Negative constraints</p>
+                          <p className="meta mt-4">금지 조건</p>
                           <p className="mt-2 text-xs leading-5 text-neutral-500">{compiled?.negativePrompt}</p>
                         </div>
                       </div>
@@ -418,7 +418,7 @@ export function ProductionPlanView({ projectId }: { projectId: string }) {
 function Prerequisite({ title, body, href, action }: { title: string; body: string; href: string; action: string }) {
   return (
     <div className="page-wrap max-w-3xl">
-      <p className="eyebrow">Production planning</p>
+      <p className="eyebrow">Production Planning · 제작 설계</p>
       <h1 className="mt-4 text-4xl font-medium tracking-[-0.04em]">{title}</h1>
       <p className="mt-4 max-w-xl text-sm leading-6 text-neutral-500">{body}</p>
       <Link href={href} className="mt-7 inline-flex min-h-10 items-center gap-2 rounded-md bg-neutral-950 px-4 text-sm font-medium text-white">
