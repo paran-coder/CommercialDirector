@@ -35,6 +35,7 @@ export const productionPlanRevisionSchema = z.object({
   sourceCampaignRevision: z.number().int().positive(),
   sourceAssetBibleRevision: z.number().int().positive(),
   sourceConceptKeys: z.array(z.string().min(1)).min(1).max(5),
+  sourceConceptRevisions: z.record(z.string(), z.number().int().positive()),
   data: productionPlanSchema,
   createdAt: z.string().min(1),
 });
@@ -89,6 +90,17 @@ export function isAssetBibleCurrent(project: ProjectSnapshot) {
 }
 
 
+export function getConceptRevisionSnapshot(project: ProjectSnapshot, conceptKeys = project.shortlist) {
+  const snapshot: Record<string, number> = {};
+  for (const key of [...new Set(conceptKeys)]) {
+    const revisions = project.conceptRevisions
+      .filter((item) => item.conceptId === key)
+      .map((item) => item.revision);
+    snapshot[key] = Math.max(1, ...revisions);
+  }
+  return snapshot;
+}
+
 export function isProductionPlanCurrent(project: ProjectSnapshot) {
   if (!isAssetBibleCurrent(project)) return false;
   const latest = project.productionPlanRevisions.at(-1);
@@ -99,5 +111,7 @@ export function isProductionPlanCurrent(project: ProjectSnapshot) {
   if (assetRevision !== latest.sourceAssetBibleRevision) return false;
   const current = [...new Set(project.shortlist)].sort();
   const source = [...new Set(latest.sourceConceptKeys)].sort();
-  return current.length === source.length && current.every((id, index) => id === source[index]);
+  if (current.length !== source.length || !current.every((id, index) => id === source[index])) return false;
+  const currentRevisions = getConceptRevisionSnapshot(project, source);
+  return source.every((key) => currentRevisions[key] === latest.sourceConceptRevisions[key]);
 }
