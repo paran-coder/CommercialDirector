@@ -84,10 +84,10 @@
 - [x] Next.js production build
 - [x] Playwright full suite
 - [x] Self-review completed
-- [ ] Final release-preparation commit CI
-- [ ] Open PR to main
-- [ ] Squash merge after green CI
-- [ ] Re-sync dev/main baseline
+- [x] Final release-preparation commit CI
+- [x] Open PR to main
+- [x] Squash merge after green CI
+- [x] Re-sync dev/main baseline
 
 ## Explicitly deferred
 - [ ] Asset reference image rendering — v1.3.0
