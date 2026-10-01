@@ -85,7 +85,10 @@ export function createAssetBibleFixture(input: {
     relationshipToProduct: heroNeeded ? "The hero treats the product as an intentional personal object; handling is specific, calm, and causally linked to the concept." : "Product carries the visual narrative without a human lead.",
     continuityLocks: heroNeeded
       ? ["Casting identity", "Hair shape", "Makeup finish", "Jewelry family", "Performance restraint"]
-      : ["No human hero introduced unless the Asset Bible is regenerated."],
+      : [
+          "No human hero introduced unless the Asset Bible is regenerated.",
+          "Keep human presence incidental and non-recurring across selected concepts.",
+        ],
     conceptRefs: heroNeeded ? heroRefs : refs,
   };
 
