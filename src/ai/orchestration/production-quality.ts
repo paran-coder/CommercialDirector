@@ -34,6 +34,48 @@ export type ConceptProductionDraft = {
   shotVariants: Array<{ duration: ProductionDuration; shots: ShotDraft[] }>;
 };
 
+
+export function validateProductionDrafts(drafts: ConceptProductionDraft[], assetBible: AssetBible) {
+  const issues: ProductionStructuralIssue[] = [];
+  const allowed = new Set([
+    assetBible.productSheet.stableKey,
+    assetBible.hero.stableKey,
+    ...assetBible.wardrobe.map((item) => item.stableKey),
+    ...assetBible.locations.map((item) => item.stableKey),
+    ...assetBible.props.map((item) => item.stableKey),
+  ]);
+
+  for (const draft of drafts) {
+    for (const sceneVariant of draft.sceneVariants) {
+      const seenSlots = new Set<number>();
+      for (const scene of sceneVariant.scenes) {
+        if (seenSlots.has(scene.slot)) {
+          issues.push(issue(draft.conceptKey, sceneVariant.duration, "scenes", "duplicate_key", `Scene slot ${scene.slot} is duplicated.`));
+        }
+        seenSlots.add(scene.slot);
+        validateAssetRefs(draft.conceptKey, sceneVariant.duration, "scenes", scene.assetRefs, allowed, assetBible, issues);
+      }
+
+      const shotVariant = draft.shotVariants.find((item) => item.duration === sceneVariant.duration);
+      if (!shotVariant) continue;
+      const seenShotSlots = new Set<string>();
+      for (const shot of shotVariant.shots) {
+        if (!seenSlots.has(shot.sceneSlot)) {
+          issues.push(issue(draft.conceptKey, sceneVariant.duration, "shots", "scene_ref", `Shot references missing scene slot ${shot.sceneSlot}.`));
+        }
+        const shotSlotKey = `${shot.sceneSlot}:${shot.slot}`;
+        if (seenShotSlots.has(shotSlotKey)) {
+          issues.push(issue(draft.conceptKey, sceneVariant.duration, "shots", "duplicate_key", `Shot slot ${shotSlotKey} is duplicated.`));
+        }
+        seenShotSlots.add(shotSlotKey);
+        validateAssetRefs(draft.conceptKey, sceneVariant.duration, "shots", shot.assetRefs, allowed, assetBible, issues);
+      }
+    }
+  }
+
+  return { valid: issues.length === 0, issues };
+}
+
 export function normalizeProductionPlan(
   drafts: ConceptProductionDraft[],
   assetBible: AssetBible,
