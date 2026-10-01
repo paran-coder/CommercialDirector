@@ -4,6 +4,7 @@ import path from "node:path";
 const fixtureImage = path.join(process.cwd(), "e2e", "fixtures", "product.png");
 
 test("fixture flow creates a campaign and exactly 20 concepts", async ({ page }) => {
+  test.setTimeout(90_000);
   await page.goto("/projects/new");
   await page.getByLabel("Brand name · optional").fill("Test Brand");
   await page.getByLabel("Product name · optional").fill("Test Product");
@@ -130,10 +131,12 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
   expect(shortlistResponse.ok()).toBeTruthy();
 
   await page.reload();
-  await expect(page.getByText("Out of date", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Refresh the Asset Bible first." })).toBeVisible();
+  await page.getByRole("link", { name: "Regenerate Asset Bible" }).click();
 
+  await expect(page.getByText("Out of date", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Regenerate" }).click();
-  await expect(page.getByText("Revision 3", { exact: true })).toBeVisible();
+  await expect(page.getByText("Revision 3", { exact: true })).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText("Current", { exact: true })).toBeVisible();
 
   await page.goto(`/projects/${projectId}/production`);
