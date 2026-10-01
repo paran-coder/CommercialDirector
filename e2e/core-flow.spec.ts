@@ -113,6 +113,14 @@ test("fixture flow creates a campaign and exactly 20 concepts", async ({ page })
   expect(projectBody.project.productionPlanRevisions).toHaveLength(2);
 
   const currentShortlist = projectBody.project.shortlist as string[];
+  const refinedConceptKey = currentShortlist[0];
+  await page.goto(`/projects/${projectId}/concepts/${refinedConceptKey}`);
+  await page.getByRole("button", { name: "Make it bolder" }).click();
+  await expect(page.getByText(/2 revisions saved/)).toBeVisible();
+
+  await page.goto(`/projects/${projectId}/production`);
+  await expect(page.getByText("Out of date", { exact: true })).toBeVisible();
+
   const additionalConcept = projectBody.project.concepts.find((concept: { id: string }) => !currentShortlist.includes(concept.id));
   if (!additionalConcept) throw new Error("Expected an additional concept for stale-state verification.");
 
