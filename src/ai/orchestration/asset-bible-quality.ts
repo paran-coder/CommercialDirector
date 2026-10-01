@@ -109,7 +109,7 @@ export function validateAssetBible(assetBible: AssetBible, shortlist: string[]) 
   };
 }
 
-function collectConceptRefs(assetBible: AssetBible): Array<[AssetBibleValidationIssue["section"], string[]]> {
+function collectConceptRefs(assetBible: AssetBible): Array<readonly [AssetBibleValidationIssue["section"], string[]]> {
   return [
     ["hero", assetBible.hero.conceptRefs],
     ...assetBible.wardrobe.map((item) => ["wardrobe", item.conceptRefs] as const),
