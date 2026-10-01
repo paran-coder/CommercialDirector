@@ -119,6 +119,7 @@ export class PostgresProjectRepository implements ProjectRepository {
       sourceCampaignRevision: row.sourceCampaignRevision,
       sourceAssetBibleRevision: row.sourceAssetBibleRevision,
       sourceConceptKeys: row.sourceConceptKeys,
+      sourceConceptRevisions: row.sourceConceptRevisions,
       data: productionPlanSchema.parse(row.data),
       createdAt: row.createdAt.toISOString(),
     }));
@@ -301,6 +302,7 @@ export class PostgresProjectRepository implements ProjectRepository {
         sourceCampaignRevision: input.sourceCampaignRevision,
         sourceAssetBibleRevision: input.sourceAssetBibleRevision,
         sourceConceptKeys: [...new Set(input.sourceConceptKeys)],
+        sourceConceptRevisions: input.sourceConceptRevisions,
         data: input.productionPlan,
       });
       await tx.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, id));
